@@ -209,7 +209,6 @@ Mythic.Core.GetEventYWhileFlying = function(){
 //=============================================================================
 // MapData
 //=============================================================================
-
 Mythic.Core.LoadMapData = function(name, src) {
     var xhr = new XMLHttpRequest();
     var url = 'data/' + src;
@@ -284,71 +283,7 @@ Mythic.Core.UpdateMapData = function(index, mapData){
     Mythic.Core.MapData.dataMaps[index] = mapData;
 }
 
-//=============================================================================
-// Player
-//=============================================================================
-
-Game_Player.prototype.checkEventTriggerThere = function(triggers) {
-    if (this.canStartLocalEvents()) {
-        var direction = this.direction();
-        var x1 = this.x;
-        var y1 = this.y;
-        var x2 = Mythic.Core.GetEventXWhileFlying();
-        var y2 = Mythic.Core.GetEventYWhileFlying();
-        this.startMapEvent(x2, y2, triggers, true);
-        if (!$gameMap.isAnyEventStarting() && $gameMap.isCounter(x2, y2)) {
-            var x3 = $gameMap.roundXWithDirection(x2, direction);
-            var y3 = $gameMap.roundYWithDirection(y2, direction);
-            this.startMapEvent(x3, y3, triggers, true);
-        }
-    }
-};
-
-//=============================================================================
-// Game_Battler
-//=============================================================================
-
-Mythic.Core.aliasGameBattlerInit = Game_BattlerBase.prototype.initMembers;
-Game_BattlerBase.prototype.initMembers = function() {
-    Mythic.Core.aliasGameBattlerInit.call(this)
-
-    Mythic.Core.initAptitudes.call(this);
-    Mythic.Core.initTypes.call(this);
-};
-
-Mythic.Core.initAptitudes = function(){
-    this._typeAptitudes = {
-        _fire: 0,
-        _water: 0,
-        _earth: 0,
-        _wind: 0,
-        _electric: 0,
-        _flying: 0,
-        _dragon: 0,
-        _bug: 0,
-        _plant: 0,
-        _light: 0,
-        _beast: 0,
-        _dark: 0
-    }
-}
-
-
-
-Mythic.Core.initTypes = function(){
-    this._elementalTypes = {
-        _fire: false,
-        _water: false,
-        _earth: false,
-        _air: false,
-        _holy: false,
-        _unholy: false
-    }
-}
-
-//=============================================================================
-// Game_Character
-//=============================================================================
+// Game Character 
 
 Game_CharacterBase.prototype.isPlayer = function() {
     return this.constructor === Game_Character ? true : false;
@@ -356,28 +291,6 @@ Game_CharacterBase.prototype.isPlayer = function() {
 
 Game_CharacterBase.prototype.isEvent = function() {
     return this.constructor === Game_Event ? true : false;
-};
-
-Mythic.Core.Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers 
-Game_CharacterBase.prototype.initMembers = function() {
-    Mythic.Core.Game_CharacterBase_initMembers.call(this);
-    Mythic.Core.initBreedingData.call(this);
-};
-
-Mythic.Core.initBreedingData = function(){
-    this._breedingData = {
-        _isMale: false,
-        _canBreed: false,
-        _isBreeding: false,
-        _isParent: false,
-        _isChild: false,
-        _parents: [],
-        _breedingRange: 0,
-        _incubationTime: 0,
-        _isEgg: false,
-        _hatchingTime: 0,
-        _timesMated: 0
-    }
 };
 
 //=============================================================================

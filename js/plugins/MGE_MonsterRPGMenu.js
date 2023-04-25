@@ -105,6 +105,7 @@ Scene_CharacterSelectMenu.prototype.commandBack = function(){
     }
 }
 
+
 Scene_CharacterSelectMenu.prototype.createCharacterCommandWindow = function(){
     this._characterCommandWindow = new Window_CharacterCommand(this, this._selectWindowRectWidth, this._commandWindowY);
     this._characterCommandWindow.setHandler('command1', this.command1.bind(this));
@@ -203,26 +204,57 @@ Window_CharacterInfo.prototype.setParams = function(parent){
     this._faceWidth = 120;
     this._faceHeight = 120;
     this._textSpacing = this._padding + 46;
-    this._nextRowSpacing = this._padding + this._textSpacing * 2;
+    this._nextRowSpacing = this._padding + this._textSpacing * 1.5;
+    this._equipTextSpacing = this._textSpacing + 24;
 }
 
 Window_CharacterInfo.prototype.setClassData = function(){
-    this._character = $dataActors[SceneManager._scene.index + 1];
-    this._profileText = this._character.profile.split('-');
-    console.log(this._profileText);
+    this._actor = new Game_Actor(SceneManager._scene.index + 1);
+    this._profileText = this._actor._profile.split('-');
+    this.setCharacterEquip();
+}
+
+Window_CharacterInfo.prototype.setCharacterEquip = function(){
+    this._actor._weapon = 'None'
+    this._actor._head = 'None'
+    this._actor._shield = 'None'
+    this._actor._body = 'None'
+    this._actor._accessory = 'None'
+
+    this._actor._equips.map( (el, i) => {
+        if (el._dataClass === 'weapon'){
+            this._actor._weapon = $dataWeapons[el._itemId].name 
+        }
+        if(el._dataClass === 'armor' && el._itemId != null && el._itemId != 0){
+            let armor = $dataArmors[el._itemId];
+            if($dataArmors[el._itemId].etypeId === 2){
+                this._actor._shield = armor.name 
+            }
+            if($dataArmors[el._itemId].etypeId === 3){
+                this._actor._head = armor.name 
+            }
+            if($dataArmors[el._itemId].etypeId === 4){
+                this._actor._body = armor.name 
+            }
+            if($dataArmors[el._itemId].etypeId === 5){
+                this._actor._accessory = armor.name 
+            }
+        } 
+    })
 }
 
 Window_CharacterInfo.prototype.drawAllItems = function(){
     this.contents.clear();
     this.setClassData();
-    this.drawFace(this._character.faceName, this._character.faceIndex, this._padding, this._padding, this._faceWidth, this._faceHeight);
+    this.drawFace(this._actor._faceName, this._actor._faceIndex, this._padding, this._padding, this._faceWidth, this._faceHeight);
     this.drawCharacterNameAndDesc();
     this.drawCharacterStats();
+    this.drawCharacterEquipment();
 }
 
 Window_CharacterInfo.prototype.drawCharacterNameAndDesc = function(){
     this.changeFontSize(24);
-    this.drawText(`${this._character.name}`, this._padding * 2 + this._faceWidth, 0, this._width - this._padding * 2, 'start');
+    this.drawText(`${this._actor._name}`, this._padding * 2 + this._faceWidth, 0, this._width - this._padding * 2, 'start');
     this.changeFontSize(16);
     this._profileText.forEach( (text, i) => {
         this.drawText(text, this._padding * 2 + this._faceWidth, this._padding + (24 * (i + 1)), this._width - this._padding * 2, 'start');
@@ -230,30 +262,52 @@ Window_CharacterInfo.prototype.drawCharacterNameAndDesc = function(){
 }
 
 Window_CharacterInfo.prototype.drawCharacterStats = function(){
-    let actor = new Game_Actor(this._character.classId);
-    console.log(actor);
-    console.log(this._character);
     this.drawText(`HP:`, this._padding, this._faceHeight + this._padding, 0, 'start')
-    this.drawText(`${actor.hp}`, this._textSpacing, this._faceHeight + this._padding, 0, 'start');
+    this.drawText(`${this._actor.hp}`, this._textSpacing, this._faceHeight + this._padding, 0, 'start');
     this.drawText(`ATK:`, this._padding, this._faceHeight + this._padding * 3, 0, 'start')
-    this.drawText(`${actor.atk}`, this._textSpacing, this._faceHeight + this._padding * 3, 0, 'start');
+    this.drawText(`${this._actor.atk}`, this._textSpacing, this._faceHeight + this._padding * 3, 0, 'start');
     this.drawText(`DEF:`, this._padding, this._faceHeight + this._padding * 5, 0, 'start')
-    this.drawText(`${actor.def}`, this._textSpacing, this._faceHeight + this._padding * 5, 0, 'start');
+    this.drawText(`${this._actor.def}`, this._textSpacing, this._faceHeight + this._padding * 5, 0, 'start');
     this.drawText(`MATK:`, this._padding, this._faceHeight + this._padding * 7, 0, 'start')
-    this.drawText(`${actor.mat}`, this._textSpacing, this._faceHeight + this._padding * 7, 0, 'start');
+    this.drawText(`${this._actor.mat}`, this._textSpacing, this._faceHeight + this._padding * 7, 0, 'start');
     this.drawText(`MDEF:`, this._padding, this._faceHeight + this._padding * 9, 0, 'start')
-    this.drawText(`${actor.mdf}`, this._textSpacing, this._faceHeight + this._padding * 9, 0, 'start');
+    this.drawText(`${this._actor.mdf}`, this._textSpacing, this._faceHeight + this._padding * 9, 0, 'start');
     
     this.drawText(`MP:`, this._nextRowSpacing, this._faceHeight + this._padding, 0, 'start')
-    this.drawText(`${actor.mp}`, this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding, 0, 'start');
+    this.drawText(`${this._actor.mp}`, this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding, 0, 'start');
     this.drawText(`AGIL:`, this._nextRowSpacing, this._faceHeight + this._padding * 3, 0, 'start')
-    this.drawText(`${actor.agi}`,this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding * 3, 0, 'start');
+    this.drawText(`${this._actor.agi}`,this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding * 3, 0, 'start');
     this.drawText(`ACC:`, this._nextRowSpacing, this._faceHeight + this._padding * 5, 0, 'start')
-    this.drawText(`${actor.hit * 100}%`,this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding * 5, 0, 'start');
+    this.drawText(`${this._actor.hit * 100}%`,this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding * 5, 0, 'start');
     this.drawText(`EV:`, this._nextRowSpacing, this._faceHeight + this._padding * 7, 0, 'start')
-    this.drawText(`${actor.eva * 100}%`,this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding * 7, 0, 'start');
+    this.drawText(`${this._actor.eva * 100}%`,this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding * 7, 0, 'start');
     this.drawText(`CRIT:`, this._nextRowSpacing, this._faceHeight + this._padding * 9, 0, 'start')
-    this.drawText(`${actor.cri * 100}%`, this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding * 9, 0, 'start'); 
+    this.drawText(`${this._actor.cri * 100}%`, this._nextRowSpacing + this._textSpacing, this._faceHeight + this._padding * 9, 0, 'start'); 
+}
+
+Window_CharacterInfo.prototype.drawCharacterEquipment = function(){
+    // _equips _skills
+    this.drawText(`Weapon:`, this._nextRowSpacing * 2.5, this._faceHeight + this._padding, 0, 'start')
+    this.drawText(`${this._actor._weapon}`, this._nextRowSpacing * 2.5 + this._equipTextSpacing, this._faceHeight + this._padding, 0, 'start'); 
+    this.drawText(`Shield:`, this._nextRowSpacing * 2.5, this._faceHeight + this._padding * 3, 0, 'start')
+    this.drawText(`${this._actor._shield}`, this._nextRowSpacing * 2.5 + this._equipTextSpacing, this._faceHeight + this._padding * 3, 0, 'start'); 
+    this.drawText(`Head:`, this._nextRowSpacing * 2.5, this._faceHeight + this._padding * 5, 0, 'start')
+    this.drawText(`${this._actor._head}`, this._nextRowSpacing * 2.5 + this._equipTextSpacing, this._faceHeight + this._padding * 5, 0, 'start'); 
+    this.drawText(`Body:`, this._nextRowSpacing * 2.5, this._faceHeight + this._padding * 7, 0, 'start')
+    this.drawText(`${this._actor._body}`, this._nextRowSpacing * 2.5 + this._equipTextSpacing, this._faceHeight + this._padding * 7, 0, 'start'); 
+    this.drawText(`Accessory:`, this._nextRowSpacing * 2.5, this._faceHeight + this._padding * 9, 0, 'start')
+    this.drawText(`${this._actor._accessory}`, this._nextRowSpacing * 2.5 + this._equipTextSpacing, this._faceHeight + this._padding * 9, 0, 'start'); 
+
+
+
+}
+
+Window_CharacterInfo.prototype.drawSkills = function(){
+    
+}
+
+Window_CharacterInfo.prototype.drawSkills = function(){
+    
 }
 
 //=============================================================================
@@ -306,7 +360,6 @@ Window_CharacterSelect.prototype.setParams = function(parent){
         new Game_Actor(4),
         new Game_Actor(5),
     ]
-    console.log(this.characters);
     this.rectWidth = this._parent._selectWindowRectWidth;
     this.rectHeight = 60;
 }
@@ -401,6 +454,158 @@ Window_CharacterCommandHorz.prototype.makeCommandList = function(x, y){
     this.addCommand('Yes', 'command1');
     this.addCommand('no', 'command2');
 }
+
+//=============================================================================
+// Crafting Menu
+//=============================================================================
+
+//=============================================================================
+// Upgrade Menu
+//=============================================================================
+
+//=============================================================================
+// Fusion Menu
+//=============================================================================
+
+//=============================================================================
+// Main Menu
+//=============================================================================
+
+Input.keyMapper['79'] = "mainMenu"
+
+Scene_MainMenu.aliasSceneMapUpdate = Scene_Map.prototype.update;
+Scene_Map.prototype.update = function() {
+    Scene_MainMenu.aliasSceneMapUpdate.call(this);
+    if(Input.isTriggered('mainMenu')) SceneManager.push(Scene_MainMenu); 
+};
+
+function Scene_MainMenu() {
+    this.initialize.apply(this, arguments);
+}
+
+Scene_MainMenu.prototype = Object.create(Scene_MenuBase.prototype);
+Scene_MainMenu.prototype.constructor = Scene_MainMenu;
+
+Scene_MainMenu.prototype.initialize = function(parent, x, y) {
+    Scene_MenuBase.prototype.initialize.call(this);
+    this.setParams(parent);
+};
+
+Scene_MainMenu.prototype.setParams = function() {
+    this._screenWidth = Graphics.boxWidth;
+    this._screenHeight = Graphics.boxHeight;
+    this._padding = 10;
+    this._margin = 10;
+    this._height = 140; 
+    this._width = 200;
+    this._selectWindowRectHeight = 64;
+    this._selectWindowRectWidth = 175 + this._padding * 2;
+    this._infoWindowTopMargin = 65;
+    this._commandWindowHeight = 120;
+    this._infoWindowWidth = Graphics.boxWidth - this._selectWindowRectWidth;
+    this._infoWindowHeight = Graphics.boxHeight - this._infoWindowTopMargin - this._commandWindowHeight;
+    this._commandWindowY = this._infoWindowHeight + this._infoWindowTopMargin;
+};
+
+Scene_MainMenu.prototype.create = function(){
+    Scene_MenuBase.prototype.create.call(this);
+    this.createMainMenuCommandWindow();
+}
+
+Scene_MainMenu.prototype.createMainMenuCommandWindow = function(){
+    this._mainMenuWindow = new Window_MainMenuCommand(0, 0);
+    this._mainMenuWindow.show();
+    this._mainMenuWindow.select(0);
+    this._mainMenuWindow.activate();
+    this._mainMenuWindow.setHandler('ok', this.command1.bind(this));
+    this._mainMenuWindow.setHandler('cancel', this.commandBack.bind(this));
+    this.addWindow(this._mainMenuWindow);
+}
+
+Scene_MainMenu.prototype.commandBack = function(){
+    if(this._mainMenuWindow.visible) {
+        this._mainMenuWindow.hide();
+        this._mainMenuWindow.deactivate();
+        this.popScene();
+    }
+}
+
+Scene_MainMenu.prototype.command1 = function(){
+    if(!this._mainMenuWindow.visible) {
+        this._mainMenuWindow.show();
+        this._mainMenuWindow.activate();
+    }
+}
+// Window_Command.prototype.initialize = function(x, y) {
+//     this.clearCommandList();
+//     this.makeCommandList();
+//     var width = this.windowWidth();
+//     var height = this.windowHeight();
+//     Window_Selectable.prototype.initialize.call(this, x, y, width, height);
+//     this.refresh();
+//     this.select(0);
+//     this.activate();
+// };
+
+function Window_MainMenuCommand() {
+    this.initialize.apply(this, arguments);
+}
+
+Window_MainMenuCommand.prototype = Object.create(Window_Command.prototype);
+Window_MainMenuCommand.prototype.constructor = Window_MainMenuCommand;
+
+Window_MainMenuCommand.prototype.initialize = function(x, y) {
+    Window_Command.prototype.initialize.call(this, x, y);
+    this.setParams(parent);
+};
+
+Window_MainMenuCommand.prototype.setParams = function(parent){
+    this._parent = parent;
+}
+
+Window_MainMenuCommand._lastCommandSymbol = null;
+
+Window_MainMenuCommand.prototype.initCommandPosition = function() {
+    this._lastCommandSymbol = null;
+};
+
+Window_MainMenuCommand.prototype.makeCommandList = function() {
+    this.addCommand('Items', 'commandItems');
+    this.addCommand('Party', 'commandParty');
+    this.setLeaderCommands();
+    this.addCommand('Craft', 'commandCraft');
+    this.addCommand('Options', 'commandOptions');
+    this.addCommand('Save', 'commandSave');
+    this.addCommand('End Game', 'commandEndGame');
+}
+
+Window_MainMenuCommand.prototype.setLeaderCommands = function(){
+    switch($dataClasses[$dataActors[$gameParty._actors].classId].name){
+        case "Geomancer":
+            this.addCommand('Geomancy', 'commandGeomancy');
+            return
+
+        case "Rogue":
+            this.addCommand('Alchemy', 'commandAlchemy');
+            return
+
+        case "White Mage":
+            this.addCommand('Enchanting', 'commandEnchanting');
+            return
+
+        case "Dark Mage":
+            this.addCommand('Enchanting', 'commandEnchanting');
+            return
+
+        case "Beastmaster":
+            this.addCommand('Survival', 'commandSurvival');
+            return           
+    }
+};
+
+
+
+
 
 //=============================================================================
 // Extending Window_Base Functionality

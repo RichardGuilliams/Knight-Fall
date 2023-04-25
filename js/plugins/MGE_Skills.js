@@ -45,23 +45,18 @@ Mythic.Skills.Lure = function(){
 
 Mythic.Skills.steal = function(arr){
     let subject = BattleManager._action.subject()
-    let grandRoll = arr.reduce( (a, b) => parseInt(a[3]) + parseInt(b[3])) * arr.length;
-    let roll = Math.floor(Math.random() * (subject.luk + subject.agi + subject.level))
-    if (roll > grandRoll) console.log('grandRoll');
-    else {
-        arr = arr.sort((a, b) => parseInt(a[3]) - parseInt(b[3]));
-        let winningItem = Math.floor(Math.random() * arr.length);
-
-        if(roll > arr[winningItem][3]){
-            let itemArr = Mythic.Core.GetGameDataByName(arr[winningItem][0]);
-            let number = Math.floor(Math.random() * arr[winningItem][2]) + 1;
-            let item = itemArr[Mythic.Core.GetIDByName(itemArr, arr[winningItem][1])];
-            $gameParty.gainItem(item, number, false);
-            BattleManager._logWindow.addText(`You stole ${number} ${item.name}!`);
-        }
-
-        else BattleManager._logWindow.addText(`You failed to steal anything!`)
+    let roll = Math.floor(Math.random() * ((subject.luk * subject.agi) * subject.level))
+    arr = arr.sort((a, b) => parseInt(a[3]) - parseInt(b[3]));
+    let winningItem = Math.floor(Math.random() * arr.length);
+    if(roll > arr[winningItem][3]){
+        let itemArr = Mythic.Core.GetGameDataByName(arr[winningItem][0]);
+        let number = Math.floor(Math.random() * arr[winningItem][2]) + 1;
+        let item = itemArr[Mythic.Core.GetIDByName(itemArr, arr[winningItem][1])];
+        $gameParty.gainItem(item, number, false);
+        BattleManager._logWindow.addText(`You stole ${number} ${item.name}!`);
     }
+    else BattleManager._logWindow.addText(`You failed to steal anything`);
+
 }
 
 
@@ -145,6 +140,7 @@ Game_Enemy.prototype.steal = function() {
             })
             Mythic.Skills.steal(items);
         }
+        else BattleManager._logWindow.addText(`There is nothing to steal`); 
     }
     Game_Battler.prototype.performDamage.call(this);
 };
