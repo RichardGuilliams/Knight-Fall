@@ -57,6 +57,39 @@ Mythic.EventSpawner.SpawnEvent = function(eventName, x, y){
     SceneManager._scene.children[0].createCharacters();
 }
 
+Mythic.EventSpawner.CreateNewEvent = function(eventName){
+    return Mythic.Core.CopyObject(Mythic.Core.MapData.events[Mythic.Core.GetIDByName(Mythic.Core.MapData.events, eventName)])
+}
+
+Mythic.EventSpawner.setDataMap = function(newEvent, x, y){
+    $dataMap.events.push(newEvent);
+    newEvent.id = $dataMap.events.length - 1;
+    $dataMap.events[newEvent.id].x = x;
+    $dataMap.events[newEvent.id].y = y;
+}
+
+Mythic.EventSpawner.setEventParentData = function(newEvent, parent1, parent2){
+    DataManager.extractMetadata($dataMap.events[newEvent.id]);
+    newEvent['parents'] = {
+        mother: parent1,
+        father: parent2
+    }
+    newEvent._monsterId = parent1._monsterId;
+    Mythic.Core.MapData.dataMap = $dataMap;
+}
+
+Mythic.EventSpawner.SpawnEventWithParentData = function(parent1, parent2, eventName, x, y){
+    Mythic.Core.CleanArray($dataMap.events);
+    let newEvent = Mythic.EventSpawner.CreateNewEvent(eventName); 
+    Mythic.EventSpawner.setDataMap(newEvent, x, y);
+    Mythic.EventSpawner.setEventParentData(newEvent, parent1, parent2)
+    Mythic.Core.UpdateMapData($gameMap._mapId, $dataMap);
+    $gameMap._events.push(new Game_Event($gameMap._mapId, newEvent.id));
+    // SceneManager._scene.children[0].addChild()
+    SceneManager._scene.children[0].createCharacters();
+}
+
+
 Mythic.EventSpawner.SpawnEventAtRandomLocation = function(){
     let eventName = $dataSkills[$gameParty.targetActor().lastMenuSkill().id].meta.MGE_SpawnName;
     let maxX = $dataMap.width;

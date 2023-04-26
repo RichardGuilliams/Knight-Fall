@@ -114,6 +114,9 @@ Game_Action.prototype.applyItemEffect = function(target, effect) {
     case Game_Action.EFFECT_STEAL:
         this.itemEffectSteal(target, effect);
         break;
+    case Game_Action.EFFECT_CATCH:
+        this.itemEffectCatch(target, effect);
+        break;
     }
 };
 
@@ -122,6 +125,14 @@ Game_Action.prototype.processSpecialSkill = function(){
     if(skill === 'Steal'){
         $dataSkills[BattleManager._action._item._itemId].effects[0] = {
             code: 101,
+            dataId: 1,
+            value1: 1,
+            value2: 0
+        }
+    }
+    if(skill === 'Catch'){
+        $dataSkills[BattleManager._action._item._itemId].effects[0] = {
+            code: 102,
             dataId: 1,
             value1: 1,
             value2: 0
@@ -145,11 +156,32 @@ Game_Enemy.prototype.steal = function() {
     Game_Battler.prototype.performDamage.call(this);
 };
 
+Game_Enemy.prototype.catch = function(target) {
+    if ($gameParty.inBattle()) {
+        if(target._catchDifficulty){
+            debugger;
+            let result = Math.floor(Math.random() * (10 * BattleManager._subject.agi))
+            console.log(result);
+            if(result > target._catchDifficulty) BattleManager._logWindow.addText(`You tamed this monster.`);
+            else BattleManager._logWindow.addText(`You failed to tame this monster.`);
+        }
+        else BattleManager._logWindow.addText(`You cannot tame this unit`); 
+    }
+    Game_Battler.prototype.performDamage.call(this);
+};
+
 Game_Action.EFFECT_STEAL = 101;
+Game_Action.EFFECT_CATCH = 102;
 
 
 Game_Action.prototype.itemEffectSteal = function(target, effect) {
     target.steal();
+    target.result();    
+    this.makeSuccess(target);
+};
+
+Game_Action.prototype.itemEffectCatch = function(target, effect) {
+    target.catch(target);
     target.result();    
     this.makeSuccess(target);
 };

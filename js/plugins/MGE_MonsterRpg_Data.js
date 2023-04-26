@@ -23,26 +23,39 @@ Mythic.MonsterRPG.version = 1;
 //=============================================================================
 
 //Game Parameters 
+//=============================================================================
+// Set Player Meta
+//=============================================================================
+
+Mythic.MonsterRPG.aliasItemInit = Game_Item.prototype.initialize;
+Game_Item.prototype.initialize = function(item) {
+    Mythic.MonsterRPG.aliasItemInit.call(this, item);
+    this.setMeta(item);
+};
+
+Game_Item.prototype.setMeta = function(item){
+    // console.log(this);
+}
 
 //=============================================================================
 // Set Player Meta
 //=============================================================================
 
-Game_Player.prototype.checkEventTriggerThere = function(triggers) {
-    if (this.canStartLocalEvents()) {
-        var direction = this.direction();
-        var x1 = this.x;
-        var y1 = this.y;
-        var x2 = Mythic.Core.GetEventXWhileFlying();
-        var y2 = Mythic.Core.GetEventYWhileFlying();
-        this.startMapEvent(x2, y2, triggers, true);
-        if (!$gameMap.isAnyEventStarting() && $gameMap.isCounter(x2, y2)) {
-            var x3 = $gameMap.roundXWithDirection(x2, direction);
-            var y3 = $gameMap.roundYWithDirection(y2, direction);
-            this.startMapEvent(x3, y3, triggers, true);
-        }
-    }
-};
+// Game_Player.prototype.checkEventTriggerThere = function(triggers) {
+//     if (this.canStartLocalEvents()) {
+//         var direction = this.direction();
+//         var x1 = this.x;
+//         var y1 = this.y;
+//         var x2 = Mythic.Core.GetEventXWhileFlying();
+//         var y2 = Mythic.Core.GetEventYWhileFlying();
+//         this.startMapEvent(x2, y2, triggers, true);
+//         if (!$gameMap.isAnyEventStarting() && $gameMap.isCounter(x2, y2)) {
+//             var x3 = $gameMap.roundXWithDirection(x2, direction);
+//             var y3 = $gameMap.roundYWithDirection(y2, direction);
+//             this.startMapEvent(x3, y3, triggers, true);
+//         }
+//     }
+// };
 
 Mythic.MonsterRPG.aliasActorInit = Game_Actor.prototype.initialize;
 Game_Actor.prototype.initialize = function(actorId) {
@@ -77,6 +90,14 @@ Game_Event.prototype.setEventMeta = function(eventId){
     this.name = $dataMap.events[eventId].name;
     this.meta = $dataMap.events[eventId].meta
     if(this.meta.Breeding) this.setBreedingData();
+    if(this.meta.Monster) this.setMonsterData();
+}
+
+Game_Event.prototype.setMonsterData = function(){
+    this._monsterId = $dataEnemies.find( (el, i) => {
+        if(i == 0) return
+         return el.name == this.meta.Monster
+        }).id
 }
 
 Game_Event.prototype.setBreedingData = function(){
@@ -104,13 +125,14 @@ Game_Event.prototype.update = function() {
 Game_Event.prototype.updateBreeding = function() {
     if(this.canBreed){
         $gameMap._events.forEach( (character, i) => {
+            if(!character) return;
             if(!this.canBreed) return
             if(this._eventId == i) return;
             if(!this.sameName(character)) return;
             if(this.outOfXBreedingRange(character) && this.outOfYBreedingRange(character)) return
             if (this.isMale == character.isMale) return 
             if (!this.isBreeding && !this.isCoolingDown) this.isBreeding = true;
-            if (this.isBreeding && !this.isCoolingDown) this.breed();
+            if (this.isBreeding && !this.isCoolingDown) this.breed(character);
         })
         if (!this.isBreeding && this.isCoolingDown) this.coolDownBreeding();
     }
@@ -137,59 +159,17 @@ Game_Event.prototype.characterSprite = function(){
     return sprite;
 }
 
-Game_Event.prototype.ANIMATION_COUNT = 0;
-Game_Event.prototype.BREEDING_COUNT = 0;
-
 Game_Event.prototype.breed = function(character){
     if(this.isBreeding == false) this.isBreeding = true;
     else {
         if(this.breedingTime > 0) {
-            if(!this._animationPlaying && this._animationId == 0 && this.characterSprite()._animationSprites.length <= 0) {
-                this.requestAnimation(120);
-                this.animationPlaying = true;
-                console.log(this._animationPlaying, this._animationId)
-            }
-            // console.log(this.characterSprite()._animationSprites);
-            // if(!this._balloonPlaying && this._balloonId == 0) {
-                //     this.requestBalloon(4)
-                // }
-                this.breedingTime = this.breedingTime - 1;
-                if(this.characterSprite()._animationSprites.length > 0) console.log(this.characterSprite()._animationSprites); 
-
+            this.breedingTime = this.breedingTime - 1;
         }
         if (this.breedingTime <= 0) {
-            this.BREEDING_COUNT;
-            this._animationCount = 0;
-            this.characterSprite()._animationFrames = null;
             this.completeBreeding(character);
         }
     }
 }
-
-// Sprite_Character.prototype.startBalloon = function() {
-//     if (!this._balloonSprite) {
-//         if(this._character.isBreeding) this._balloonSprite = new Sprite_Balloon(.5, .5, .5)
-//         else this._balloonSprite = new Sprite_Balloon(1, 1, .5);
-//     }
-//     this._balloonSprite.setup(this._character.balloonId());
-//     this.parent.addChild(this._balloonSprite);
-// };
-
-// Sprite_Balloon.prototype.initialize = function(scale, xAnchor, yAnchor) {
-//     Sprite_Base.prototype.initialize.call(this);
-//     this.initMembers();
-//     this.loadBitmap();
-//     if(scale) this.initScale(scale, xAnchor, yAnchor);
-// };
-
-// Sprite_Balloon.prototype.initScale = function(scale, xAnchor, yAnchor){
-//     this.transform.scale._x = scale;
-//     this.transform.scale._y = scale;
-//     this.anchor._x = xAnchor;
-//     this.anchor._y = yAnchor
-// }
-
-
 
 Game_Event.prototype.coolDownBreeding = function(){
     if(this.coolDownTime > 0) this.coolDownTime -= 1;
@@ -200,8 +180,8 @@ Game_Event.prototype.coolDownBreeding = function(){
 }
 
 Game_Event.prototype.completeBreeding = function(character){
-    console.log('Breeding Complete');
-    if(this.isMale == 0) this.SpawnEggBehindMonster();
+    // console.log('Breeding Complete');
+    if(this.isMale == 0) this.SpawnEggBehindMonster(character);
     this.isCoolingDown = true;
     this.isBreeding = false;
     this.breedingTime = this.breedingSpeed * this.ticksInSeconds;
@@ -211,19 +191,151 @@ Game_Event.prototype.sameName = function(character){
     return this.name === character.name;
 }
 
-Game_Event.prototype.SpawnEggBehindMonster = function(){
+Game_Event.prototype.SpawnEggBehindMonster = function(character){
     // Left
-    if(this.direction() == 4) return Mythic.EventSpawner.SpawnEvent('Egg Green', this._realX + 1, this._realY);
+    if(this.direction() == 4) return Mythic.EventSpawner.SpawnEventWithParentData(this, character, 'Egg Green', this._realX + 1, this._realY);
     // Right
-    if(this.direction() == 6) return Mythic.EventSpawner.SpawnEvent('Egg Green', this._realX - 1, this._realY);
+    if(this.direction() == 6) return Mythic.EventSpawner.SpawnEventWithParentData(this, character, 'Egg Green', this._realX - 1, this._realY);
     // Down
-    if(this.direction() == 2) return Mythic.EventSpawner.SpawnEvent('Egg Green', this._realX, this._realY - 1);
+    if(this.direction() == 2) return Mythic.EventSpawner.SpawnEventWithParentData(this, character, 'Egg Green', this._realX, this._realY - 1);
     // Up
-    if(this.direction() == 8) return Mythic.EventSpawner.SpawnEvent('Egg Green', this._realX, this._realY + 1);
+    if(this.direction() == 8) return Mythic.EventSpawner.SpawnEventWithParentData(this, character, 'Egg Green', this._realX, this._realY + 1);
 }
 //=============================================================================
 // Set Game Enemy Meta
 //=============================================================================
+Game_Enemy.prototype.initialize = function(enemyId, x, y) {
+    Game_Battler.prototype.initialize.call(this);
+    this.setup(enemyId, x, y);
+    Mythic.MonsterRPG.setEnemyMeta.call(this, enemyId);
+    this.recoverAll();
+};
+
+    //Param
+    //MHP = 0
+    //MMP = 1
+    //ATK = 2
+    //DEF = 3
+    //MAT = 4
+    //MDF = 5
+    //AGI = 6
+    //LUK = 7
+
+    // XParam
+    //HIT = 0
+    //EVA = 1
+    //CRI = 2
+    //CEV = 3
+    //MEV = 4
+    //MRF = 5
+    //CNT = 6
+    //HRG = 7
+    //MRG = 8
+    //TRG = 9
+
+    // TarGet Rate 0
+    // GuaRD effect rate 1
+    // RECovery effect rate 2
+    // PHArmacology 3
+    // Mp Cost Rate 4
+    // Tp Charge Rate 5
+    // Physical Damage Rate 6
+    // Magical Damage Rate 7
+    // Floor Damage Rate 8
+    // EXperience Rate 9
+
+    
+
+Mythic.MonsterRPG.setEnemyMeta = function(enemyId){
+    let meta = $dataEnemies[enemyId].meta;
+    if(meta.DropItems){
+        this._dropItems = Mythic.MetaCore.convertMultiArray.call(this, meta.DropItems, ',', '-')
+        this._dropItems.map( (item, i) => { this._dropItems[i] = Mythic.MetaCore.convertArrayToObject(
+            ['_type', '_name', '_quantity', '_dropChance'],
+            [item[0], item[1], item[2], item[3]]
+        )})
+    } 
+    if(meta.StealItems){
+        this._stealItems = Mythic.MetaCore.convertMultiArray.call(this, meta.StealItems, ',', '-')
+        this._stealItems.map( (item, i) => { this._stealItems[i] = Mythic.MetaCore.convertArrayToObject(
+            ['_type', '_name', '_quantity', '_stealChance'],
+            [item[0], item[1], item[2], item[3]]
+        )})
+    } 
+    if(meta.Rank) this._rank = meta.Rank;
+    if(meta.Types) this._types = Mythic.MetaCore.getArrayFromMetaData(meta.Types, ',')
+    if(meta.CatchDifficulty) this._catchDifficulty = parseInt(meta.CatchDifficulty)
+    this._lvl = Math.floor(Math.random() * $gameMap._maxLvl) + $gameMap._minLvl;
+    this.setParams(meta, enemyId);
+    console.log(this._lvl, this._paramPlus, this._paramBase);
+}
+
+Game_Enemy.prototype.setParams = function(meta, enemyId){
+    this._baseParams = $dataEnemies[enemyId].params
+    if(meta.HpGrowth) this._hpGrowth = parseInt(meta.HpGrowth)
+    if(meta.MpGrowth) this._mpGrowth = parseInt(meta.MpGrowth)
+    if(meta.TpGrowth) this._tpGrowth = parseInt(meta.TpGrowth)
+    if(meta.AtkGrowth) this._atkGrowth = parseInt(meta.AtkGrowth)
+    if(meta.DefGrowth) this._defGrowth = parseInt(meta.DefGrowth)
+    if(meta.MatGrowth) this._matGrowth = parseInt(meta.MatGrowth)
+    if(meta.MdfGrowth) this._mdfGrowth = parseInt(meta.MdfGrowth)
+    if(meta.AgiGrowth) this._agiGrowth = parseInt(meta.AgiGrowth)
+    if(meta.LukGrowth) this._lukGrowth = parseInt(meta.LukGrowth)
+
+    this._paramPlus[0] = this.addLevels(this._hpGrowth, 0);
+    this._paramPlus[1] = this.addLevels(this._mpGrowth, 1);
+    this._paramPlus[2] = this.addLevels(this._tpGrowth, 2);
+    this._paramPlus[3] = this.addLevels(this._atkGrowth, 3);
+    this._paramPlus[4] = this.addLevels(this._defGrowth, 4);
+    this._paramPlus[5] = this.addLevels(this._matGrowth, 5);
+    this._paramPlus[6] = this.addLevels(this._mdfGrowth, 6);
+    this._paramPlus[7] = this.addLevels(this._agiGrowth, 7);
+    this._paramPlus[8] = this.addLevels(this._lukGrowth, 8);
+
+    this._hp = this._paramPlus[0] + this._hp;
+    this._mp = this._paramPlus[1] + this._mp;
+    this._tp = this._paramPlus[2] + this._tp;
+}
+
+Game_Enemy.prototype.addLevels = function(param, i){
+    let base = $dataEnemies[this._enemyId].params[i] || 0;
+    let result = 0;
+    for(let i = 0; i < this._lvl; i++){
+        result += Math.floor(Math.random() * param) + Math.floor(Math.random() * base) + 1;
+    }
+    return result;
+}
+
+
+//=============================================================================
+// Game_Map
+//=============================================================================
+
+Mythic.MonsterRPG.aliasMapSetup = Game_Map.prototype.setup;
+Game_Map.prototype.setup = function(mapId) {
+    Mythic.MonsterRPG.aliasMapSetup.call(this, mapId);
+    this.setMapMeta($dataMap.meta);
+};
+
+Game_Map.prototype.setMapMeta = function(meta){
+    this.setLureEncounters(meta);
+    if(meta.MinLvl) this._minLvl = parseInt(meta.MinLvl)
+    if(meta.MaxLvl) this._maxLvl = parseInt(meta.MaxLvl)
+};
+
+Game_Map.prototype.setLureEncounters = function(meta){
+    if(meta.LureEncounters){
+        this._lureEncounters = Mythic.MetaCore.convertMultiArray(meta.LureEncounters, ';', ',');
+        this._lureEncounters.map( 
+            (encounter, i) => { 
+                this._lureEncounters[i] = 
+                Mythic.MetaCore.convertArrayToObject(
+                    ['monsterId', 'canEscape', 'canLose'],
+                    [encounter[0], encounter[1], encounter[2]]
+                )
+            })
+    }
+}
 
 //=============================================================================
 // Game_Battler
@@ -266,85 +378,6 @@ Mythic.MonsterRPG.initTypes = function(){
         _unholy: false
     }
 }
-
-//=============================================================================
-// Game_Character
-//=============================================================================
-
-// Mythic.MonsterRPG.Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers 
-// Game_CharacterBase.prototype.initMembers = function() {
-//     Mythic.MonsterRPG.Game_CharacterBase_initMembers.call(this);
-//     Mythic.MonsterRPG.initBreedingData.call(this);
-// };
-
-// Mythic.MonsterRPG.initBreedingData = function(){
-//     this._breedingData = {
-//         _isMale: false,
-//         _canBreed: false,
-//         _isBreeding: false,
-//         _isParent: false,
-//         _isChild: false,
-//         _parents: [],
-//         _breedingRange: 0,
-//         _incubationTime: 0,
-//         _isEgg: false,
-//         _hatchingTime: 0,
-//         _timesMated: 0
-//     }
-// };
-
-
-Game_Enemy.prototype.initialize = function(enemyId, x, y) {
-    Game_Battler.prototype.initialize.call(this);
-    this.setup(enemyId, x, y);
-    this.setMeta(enemyId);
-};
-
-Game_Enemy.prototype.setStealItems = function(meta){
-    if(meta.StealItems != undefined){
-        this._stealItems = Mythic.MetaCore.getArrayFromMetaData(meta.StealItems, ',');
-        this._stealItems.map( (item, i) => {
-            this._stealItems[i] = item.split('-');
-            Mythic.MetaCore.ConvertStringToNum(this._stealItems[i]);
-        })
-    }
-}
-
-Game_Enemy.prototype.setDropItems = function(meta){
-    if(meta.DropItems != undefined){
-        this._dropItems = Mythic.MetaCore.getArrayFromMetaData(meta.DropItems, ',');
-        this._dropItems.map( (item, i) => {
-            this._dropItems[i] = item.split('-');
-            Mythic.MetaCore.ConvertStringToNum(this._dropItems[i]);
-        })
-    }
-}
-
-Game_Enemy.prototype.setRank = function(meta){
-    if(meta.Rank != undefined)  this._rank = meta.Rank;
-}
-
-Game_Enemy.prototype.setTypes = function(meta){
-    if(meta.Types != undefined) this._types = Mythic.MetaCore.getArrayFromMetaData(meta.Types, ',');
-}
-
-
-
-Game_Enemy.prototype.setMeta = function(enemyId){
-    let meta = $dataEnemies[enemyId].meta;
-    this.setStealItems(meta);
-    this.setDropItems(meta);
-    this.setRank(meta);
-    this.setTypes(meta);
-};
-
-
-Mythic.MonsterRPG.setEnemyMeta = function(battler, enemyId){
-    let meta = $dataEnemies[enemyId].meta
-    battler._stealItems = Mythic.MetaCore.getArrayFromMetaData(meta.StealItems, ',').split('-');
-    // console.log(battler);
-}
-
 
 Mythic.MonsterRPG.update = function(){
     

@@ -33,15 +33,36 @@ Mythic.MetaCore.convertMetaToProperty = function(actor, propertyLocation, proper
     actor[propertyLocation][propertyName] = propertyValue;
 }
 
-Mythic.MetaCore.CleanMetaData = function(meta, symbol){
+Mythic.MetaCore.CleanMetaData = function(meta){
     return meta.replaceAll('\n', '');
 }
 
 Mythic.MetaCore.getArrayFromMetaData = function(meta, symbol){
-    meta = Mythic.MetaCore.CleanMetaData(meta);
-    return meta.split(symbol)
+    meta = Mythic.MetaCore.CleanMetaData(meta).split(symbol);
+    return meta
 }
 
+Mythic.MetaCore.convertArrayToObject = function(propertyNames, properties){
+    let obj = {}
+    propertyNames.map( (name, i) => { obj[name] = properties[i] })
+    return obj;
+}
+
+Mythic.MetaCore.convertMultiArray = function(meta, ...symbols){
+    let arr = []
+    symbols.map( symbol => {
+        if(meta[0].length > 1) meta.map( item => {
+            arr.push(Mythic.MetaCore.getArrayFromMetaData(item, symbol)); 
+        })
+        else meta = Mythic.MetaCore.getArrayFromMetaData(meta, symbol);
+    });
+    arr.map( el => {
+        el.map( (item, i) => {
+            if(!isNaN(item)) el[i] = parseInt(item);
+        })
+    })
+    return arr;
+}
 
 Mythic.MetaCore.ConvertStringToNum = function(item){
     item.map( (el, i) => {

@@ -603,9 +603,33 @@ Window_MainMenuCommand.prototype.setLeaderCommands = function(){
     }
 };
 
+//=============================================================================
+// Window for monster info during battle
+//=============================================================================
+
+function Window_EnemyInfo(){
+    this.initialize.apply(this, arguments);
+}
+
+Window_EnemyInfo.prototype = Object.create(Window_Base.prototype);
+Window_EnemyInfo.prototype.constructor = Window_EnemyInfo;
 
 
+Window_EnemyInfo.prototype.initialize = function(parent, x, y, width, height){
+    Window_Base.prototype.initialize.call(this, x, y, width, height);
+    this.setParams(parent);
+    this.drawAllItems();
+}
 
+Window_EnemyInfo.prototype.setParams = function(parent){
+    this.x
+}
+
+
+Window_EnemyInfo.prototype.drawAllItems = function(){
+    this.contents.clear();
+    this.setClassData();
+}
 
 //=============================================================================
 // Extending Window_Base Functionality

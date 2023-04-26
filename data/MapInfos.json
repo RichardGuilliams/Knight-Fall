@@ -1,8 +1,8 @@
 [
 null,
 {"id":1,"expanded":true,"name":"EventSpawnData","order":1,"parentId":0,"scrollX":679,"scrollY":386.5},
-{"id":2,"expanded":false,"name":"TestingMap","order":2,"parentId":0,"scrollX":679,"scrollY":394.5},
-{"id":3,"expanded":false,"name":"Gallaena","order":3,"parentId":0,"scrollX":1842.6666666666667,"scrollY":1182.6666666666667},
-{"id":4,"expanded":true,"name":"The Magic Forest","order":4,"parentId":0,"scrollX":4834,"scrollY":634.5},
+{"id":2,"expanded":false,"name":"TestingMap","order":2,"parentId":0,"scrollX":509.3333333333333,"scrollY":526},
+{"id":3,"expanded":false,"name":"Gallaena","order":3,"parentId":0,"scrollX":1843,"scrollY":1182.5},
+{"id":4,"expanded":true,"name":"The Magic Forest","order":4,"parentId":0,"scrollX":3694,"scrollY":1762.6666666666667},
 {"id":5,"expanded":false,"name":"The Warriors Guild","order":5,"parentId":4,"scrollX":832,"scrollY":477.5}
 ]
