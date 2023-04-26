@@ -607,6 +607,89 @@ Window_MainMenuCommand.prototype.setLeaderCommands = function(){
 // Window for monster info during battle
 //=============================================================================
 
+function Window_EnemyStatus(){
+    this.initialize.apply(this, arguments);
+}
+
+Window_EnemyStatus.prototype = Object.create(Window_Base.prototype);
+Window_EnemyStatus.prototype.constructor = Window_EnemyStatus;
+
+// height 60
+// var _enemyStatus = new Window_EnemyStatus($gameTroop._enemies[0]._screenX - 100, $gameTroop._enemies[0]._screenY - 100, 200, 100)
+// var _enemyStatus = new Window_EnemyStatus($gameTroop._enemies[0]._screenX - 100, $gameTroop._enemies[0]._screenY - 100, 200, 100)
+BattleManager.setEnemyStatusWindow = function(logWindow) {
+    this._enemyStatusWindow = _enemyStatusWindow;
+};
+
+Mythic.MonsterRPG.aliasBattleCreateWindows = Scene_Battle.prototype.createAllWindows
+Scene_Battle.prototype.createAllWindows = function() {
+    Mythic.MonsterRPG.aliasBattleCreateWindows.call(this);
+    this.createEnemyStatusWindow();
+};
+
+Scene_Battle.prototype.createEnemyStatusWindow = function() {
+    this._enemyStatusWindow = new Window_EnemyStatus(0, 0, 0, 0);
+    this.addWindow(this._enemyStatusWindow);
+};
+
+Scene_Battle.prototype.update = function() {
+    var active = this.isActive();
+    $gameTimer.update(active);
+    $gameScreen.update();
+    this.updateStatusWindow();
+    this.updateEnemyStatusWindow();
+    this.updateWindowPositions();
+    if (active && !this.isBusy()) {
+        this.updateBattleProcess();
+    }
+    Scene_Base.prototype.update.call(this);
+};
+
+Scene_Battle.prototype.updateEnemyStatusWindow = function(){
+    this._enemyStatusWindow.update();
+};
+
+
+
+Window_EnemyStatus.prototype.initialize = function(x, y, width, height){
+    Window_Base.prototype.initialize.call(this, x, y, width, height);
+    this.setParams();
+    this.createWindows();
+    this.drawAllItems();
+}
+
+Window_EnemyStatus.prototype.update = function(){
+    if(this._enemy0Info) this._enemy0Info.drawAllItems($gameTroop._enemies[0]);
+    if(this._enemy1Info) this._enemy1Info.drawAllItems($gameTroop._enemies[1]);
+    if(this._enemy2Info) this._enemy2Info.drawAllItems($gameTroop._enemies[2]);
+    if(this._enemy3Info) this._enemy3Info.drawAllItems($gameTroop._enemies[3]);
+}
+
+Window_EnemyStatus.prototype.createWindows = function(){
+    $gameTroop._enemies.forEach( (el, i) => {
+        let x = el._screenX - 48;
+        let y = el._screenY;
+        this[`_enemy${i}Info`] = new Window_EnemyInfo(el, x - 50, y - 10, 150, 100);
+        this.addChild(this[`_enemy${i}Info`]);
+    })
+}
+
+Window_EnemyStatus.prototype.setParams = function(){
+    this._height = 60;
+    this._width = 100;
+    this._textSize = 14;
+}
+
+
+Window_EnemyStatus.prototype.drawAllItems = function(){
+    this.contents.clear();
+    // this.setClassData();
+}
+
+//=============================================================================
+// Extending Window_Base Functionality
+//=============================================================================
+
 function Window_EnemyInfo(){
     this.initialize.apply(this, arguments);
 }
@@ -614,22 +697,20 @@ function Window_EnemyInfo(){
 Window_EnemyInfo.prototype = Object.create(Window_Base.prototype);
 Window_EnemyInfo.prototype.constructor = Window_EnemyInfo;
 
-
-Window_EnemyInfo.prototype.initialize = function(parent, x, y, width, height){
+Window_EnemyInfo.prototype.initialize = function(subject, x, y, width, height){
     Window_Base.prototype.initialize.call(this, x, y, width, height);
-    this.setParams(parent);
-    this.drawAllItems();
+    this._windowFrameSprite.visible = false;
+    this._windowBackSprite.visible = false;
+    this.drawAllItems(subject);
 }
 
-Window_EnemyInfo.prototype.setParams = function(parent){
-    this.x
+Window_EnemyInfo.prototype.drawAllItems = function(subject){
+    this.changeFontSize(15);
+    this.drawText(`Lvl: ${subject._lvl}`, 0, 0, 40, 'start')
+    this.drawText(`Hp:`, 50, 0, 40, 'start');
+    this.drawGauge(80, -12, 60, subject.hpRate(), 'red', 'red');
 }
 
-
-Window_EnemyInfo.prototype.drawAllItems = function(){
-    this.contents.clear();
-    this.setClassData();
-}
 
 //=============================================================================
 // Extending Window_Base Functionality
