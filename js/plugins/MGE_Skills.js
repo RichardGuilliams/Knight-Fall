@@ -184,7 +184,12 @@ Game_Enemy.prototype.initNewMonster = function(newMonsterId){
     let monster = $dataActors[$dataActors.length - 1];
     monster.initialLevel = this._lvl;
     Mythic.CopyCore.CopyToData($dataClasses ,monster.classId);
+    this._classParams.map( (el, i) => { 
+        if(i == 1) return
+        else el[this._lvl] += 1;
+    });
     $dataClasses[$dataClasses.length - 1].params = this._classParams;
+    console.log($dataClasses[$dataClasses.length - 1].params)
     // debugger;
     monster.classId = $dataClasses.length - 1;
     $gameParty.addActor($dataActors.length - 1);

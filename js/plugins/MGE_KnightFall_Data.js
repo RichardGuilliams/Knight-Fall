@@ -293,11 +293,10 @@ Game_Enemy.prototype.setParams = function(meta, enemyId){
     this._paramPlus[6] = this.addLevels(this._mdfGrowth, 6);
     this._paramPlus[7] = this.addLevels(this._agiGrowth, 7);
     this._paramPlus[8] = this.addLevels(this._lukGrowth, 8);
-
+    
     this._hp = this._paramPlus[0];
     this._mp = this._paramPlus[1];
     this._tp = this._paramPlus[2];
-    console.log(this._lvl, this._hp, this.mhp, this._classParams[0]);
 }
 
 Game_Enemy.prototype.initStatBonuses = function(){
@@ -326,7 +325,7 @@ Game_Enemy.prototype.setBonus = function(stat){
 }
 
 Game_Enemy.prototype.addLevels = function(param, ind){
-    let newParam = [ind == 1 ? 0 : 1];
+    let newParam = [];
     let result = this._baseParams[ind];
     for (let i = 0; i < 98; i++){
         result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
@@ -336,7 +335,7 @@ Game_Enemy.prototype.addLevels = function(param, ind){
     //     result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
     // }
     this._classParams.push(newParam);
-    return newParam[this._lvl + 1];
+    return newParam[this._lvl];
 }
 
 
