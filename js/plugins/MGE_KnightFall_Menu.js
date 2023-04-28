@@ -12,7 +12,7 @@ Mythic.Menu.version = 1;
 
 //=============================================================================
 /*: 
- * @plugindesc Creates The Menus for MonsterRPG
+ * @plugindesc Creates The Menus for KnightFall
  * @author Richard Guilliams
  *
  * @help This plugin does not provide plugin commands.
@@ -621,9 +621,9 @@ BattleManager.setEnemyStatusWindow = function(logWindow) {
     this._enemyStatusWindow = _enemyStatusWindow;
 };
 
-Mythic.MonsterRPG.aliasBattleCreateWindows = Scene_Battle.prototype.createAllWindows
+Mythic.KnightFall.aliasBattleCreateWindows = Scene_Battle.prototype.createAllWindows
 Scene_Battle.prototype.createAllWindows = function() {
-    Mythic.MonsterRPG.aliasBattleCreateWindows.call(this);
+    Mythic.KnightFall.aliasBattleCreateWindows.call(this);
     this.createEnemyStatusWindow();
 };
 
