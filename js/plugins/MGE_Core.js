@@ -134,12 +134,14 @@ Mythic.Core.UpdateEventNames = function(){
     })
 }
 
-Mythic.Core.CopyObject = function(data){
-    return JSON.parse(JSON.stringify(data));
-}
-
 Mythic.Core.RandomNumber = function(max){
     return Math.floor(Math.random() * max);
+}
+
+Mythic.Core.RandomNumberNoZero = function(max){
+    let result = this.RandomNumber(max)
+    if(result > 0) return result;
+    else return 1
 }
 
 Game_Map.prototype.setupStartingMapEvent = function() {

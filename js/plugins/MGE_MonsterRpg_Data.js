@@ -267,10 +267,10 @@ Mythic.MonsterRPG.setEnemyMeta = function(enemyId){
     if(meta.CatchDifficulty) this._catchDifficulty = parseInt(meta.CatchDifficulty)
     this._lvl = Math.floor(Math.random() * $gameMap._maxLvl) + $gameMap._minLvl;
     this.setParams(meta, enemyId);
-    console.log(this._lvl, this._paramPlus, this._paramBase);
 }
 
 Game_Enemy.prototype.setParams = function(meta, enemyId){
+    this._classParams = [];
     this._baseParams = $dataEnemies[enemyId].params
     if(meta.HpGrowth) this._hpGrowth = parseInt(meta.HpGrowth)
     if(meta.MpGrowth) this._mpGrowth = parseInt(meta.MpGrowth)
@@ -281,6 +281,8 @@ Game_Enemy.prototype.setParams = function(meta, enemyId){
     if(meta.MdfGrowth) this._mdfGrowth = parseInt(meta.MdfGrowth)
     if(meta.AgiGrowth) this._agiGrowth = parseInt(meta.AgiGrowth)
     if(meta.LukGrowth) this._lukGrowth = parseInt(meta.LukGrowth)
+
+    this.initStatBonuses();
 
     this._paramPlus[0] = this.addLevels(this._hpGrowth, 0);
     this._paramPlus[1] = this.addLevels(this._mpGrowth, 1);
@@ -295,15 +297,47 @@ Game_Enemy.prototype.setParams = function(meta, enemyId){
     this._hp = this._paramPlus[0] + this._hp;
     this._mp = this._paramPlus[1] + this._mp;
     this._tp = this._paramPlus[2] + this._tp;
+    console.log(this._lvl, this._statBonuses);
 }
 
-Game_Enemy.prototype.addLevels = function(param, i){
-    let base = $dataEnemies[this._enemyId].params[i] || 0;
+Game_Enemy.prototype.initStatBonuses = function(){
+    // needs to reduce chances of getting high numbers.
+    // out of 100?
+    let statBonus = [0, 3, 5, 7];
+    this._statBonuses = [
+        this.setBonus(),
+        this.setBonus(),
+        this.setBonus(),
+        this.setBonus(),
+        this.setBonus(),
+        this.setBonus(),
+        this.setBonus(),
+        this.setBonus()
+    ]
+}
+
+Game_Enemy.prototype.setBonus = function(stat){
+    let score = [45, 70, 92]
+    let roll = Math.floor(Math.random() * 100)
+    if(roll <= score[0]) return 1
+    if(roll <= score[1] && roll >= score[0]) return 3
+    if(roll <= score[2] && roll >= score[1]) return 5
+    if(roll >= score[2]) return 7
+}
+
+Game_Enemy.prototype.addLevels = function(param, ind){
+    let newParam = [ind == 2 ? 0 : 1, ind];
+    // let base = $dataEnemies[this._enemyId].params[i] || 0;
     let result = 0;
-    for(let i = 0; i < this._lvl; i++){
-        result += Math.floor(Math.random() * param) + Math.floor(Math.random() * base) + 1;
+    for (let i = 0; i < 98; i++){
+        result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
+        newParam.push(result);
     }
-    return result;
+    for(let i = 0; i < this._lvl; i++){
+        result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
+    }
+    this._classParams.push(newParam);
+    return newParam[this._lvl + 1];
 }
 
 

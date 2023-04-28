@@ -115,7 +115,7 @@ Game_Action.prototype.applyItemEffect = function(target, effect) {
         this.itemEffectSteal(target, effect);
         break;
     case Game_Action.EFFECT_CATCH:
-        this.itemEffectCatch(target, effect);
+        this.itemEffectCatch($gameActors._data[this._subjectActorId], target, effect);
         break;
     }
 };
@@ -156,19 +156,50 @@ Game_Enemy.prototype.steal = function() {
     Game_Battler.prototype.performDamage.call(this);
 };
 
-Game_Enemy.prototype.catch = function(target) {
+Game_Enemy.prototype.catch = function(subject, target, effect) {
     if ($gameParty.inBattle()) {
         if(target._catchDifficulty){
-            debugger;
-            let result = Math.floor(Math.random() * (10 * BattleManager._subject.agi))
-            console.log(result);
-            if(result > target._catchDifficulty) BattleManager._logWindow.addText(`You tamed this monster.`);
+            if(this.checkCatchSuccess(subject, target)) this.catchSuccess();
             else BattleManager._logWindow.addText(`You failed to tame this monster.`);
         }
         else BattleManager._logWindow.addText(`You cannot tame this unit`); 
     }
     Game_Battler.prototype.performDamage.call(this);
 };
+
+Game_Enemy.prototype.checkCatchSuccess = function(subject, target){
+    let roll = Mythic.Core.RandomNumber((subject.agi + subject.luk) * subject._level);
+    let cr = (this.luk + this.agi + this.hp) * this._lvl;
+    if(roll > cr) return true
+}
+
+Game_Enemy.prototype.catchSuccess = function(){
+    this._hp = 0;
+    let newMonsterId = $dataActors.find( (el) => { if(el != undefined) return el.name == 'Slime' }).id;
+    this.initNewMonster(newMonsterId);
+};
+
+Game_Enemy.prototype.initNewMonster = function(newMonsterId){
+    Mythic.CopyCore.CopyToData($dataActors, newMonsterId);
+    let monster = $dataActors[$dataActors.length - 1];
+    Mythic.CopyCore.CopyToData($dataClasses ,monster.classId);
+    let monsterClass = $dataClasses[$dataClasses.length - 1];
+    this.setupNewMonster(monster, monsterClass);
+};
+
+Game_Enemy.prototype.setupNewMonster = function(monster, monsterClass){
+    debugger;
+    monsterClass.params.map( (el, i) => {
+        this.setNewMonsterParams(monsterClass, el);
+    })
+}
+
+Game_Enemy.prototype.setNewMonsterParams = function(monsterClass, el){
+    debugger;
+    el.map( stat => {
+
+    })
+}
 
 Game_Action.EFFECT_STEAL = 101;
 Game_Action.EFFECT_CATCH = 102;
@@ -180,8 +211,8 @@ Game_Action.prototype.itemEffectSteal = function(target, effect) {
     this.makeSuccess(target);
 };
 
-Game_Action.prototype.itemEffectCatch = function(target, effect) {
-    target.catch(target);
+Game_Action.prototype.itemEffectCatch = function(subject, target, effect) {
+    target.catch(subject, target, effect);
     target.result();    
     this.makeSuccess(target);
 };

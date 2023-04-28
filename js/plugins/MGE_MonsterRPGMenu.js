@@ -669,7 +669,7 @@ Window_EnemyStatus.prototype.createWindows = function(){
     $gameTroop._enemies.forEach( (el, i) => {
         let x = el._screenX - 48;
         let y = el._screenY;
-        this[`_enemy${i}Info`] = new Window_EnemyInfo(el, x - 50, y - 10, 150, 100);
+        this[`_enemy${i}Info`] = new Window_EnemyInfo(el, x - 50, y - 10, 250, 100);
         this.addChild(this[`_enemy${i}Info`]);
     })
 }
@@ -705,10 +705,18 @@ Window_EnemyInfo.prototype.initialize = function(subject, x, y, width, height){
 }
 
 Window_EnemyInfo.prototype.drawAllItems = function(subject){
-    this.changeFontSize(15);
-    this.drawText(`Lvl: ${subject._lvl}`, 0, 0, 40, 'start')
-    this.drawText(`Hp:`, 50, 0, 40, 'start');
-    this.drawGauge(80, -12, 60, subject.hpRate(), 'red', 'red');
+    if(subject.hp > 0){
+        this.contents.clear();
+        this.changeFontSize(15);
+        this.drawText(`Lvl: ${subject._lvl}`, 0, 0, 40, 'start')
+        this.drawText(`Hp:`, 50, 0, 40, 'start');
+        this.drawGauge(80, -12, 100, subject.hpRate(), 'red', 'red');
+        this.drawText(`${subject.hp}`, 80, -12, 100, 'start');
+        this.drawText('/', 95, -12, 100, 'start');
+        this.drawText(`${subject.mhp}`, 110, -12, 100, 'start');
+    }
+    else this.contents.clear();
+
 }
 
 
