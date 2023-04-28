@@ -1,6 +1,6 @@
 //=============================================================================
 // Mythic Games Engine - Flying Object Shadows
-// MGE_MonsterRPGMenu.js
+// MGE_KnightFallMenu.js
 //=============================================================================
 
 var Imported = Imported || {};

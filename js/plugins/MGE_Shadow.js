@@ -1,6 +1,6 @@
 //=============================================================================
-// Mythic Games Engine - Monster Rpg Menu
-// MGE_MonsterRPGMenu.js
+// Mythic Games Engine - Knight Fall Menu
+// MGE_KnightFallMenu.js
 //=============================================================================
 
 var Imported = Imported || {};

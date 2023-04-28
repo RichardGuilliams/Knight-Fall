@@ -182,25 +182,13 @@ Game_Enemy.prototype.catchSuccess = function(){
 Game_Enemy.prototype.initNewMonster = function(newMonsterId){
     Mythic.CopyCore.CopyToData($dataActors, newMonsterId);
     let monster = $dataActors[$dataActors.length - 1];
+    monster.initialLevel = this._lvl;
     Mythic.CopyCore.CopyToData($dataClasses ,monster.classId);
-    let monsterClass = $dataClasses[$dataClasses.length - 1];
-    this.setupNewMonster(monster, monsterClass);
+    $dataClasses[$dataClasses.length - 1].params = this._classParams;
+    // debugger;
+    monster.classId = $dataClasses.length - 1;
+    $gameParty.addActor($dataActors.length - 1);
 };
-
-Game_Enemy.prototype.setupNewMonster = function(monster, monsterClass){
-    debugger;
-    monsterClass.params.map( (el, i) => {
-        this.setNewMonsterParams(monsterClass, el);
-    })
-}
-
-Game_Enemy.prototype.setNewMonsterParams = function(monsterClass, el){
-    debugger;
-    el.map( stat => {
-
-    })
-}
-
 Game_Action.EFFECT_STEAL = 101;
 Game_Action.EFFECT_CATCH = 102;
 

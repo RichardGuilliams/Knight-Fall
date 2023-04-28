@@ -1,14 +1,14 @@
 //=============================================================================
-// Mythic Games Engine - Monster RPG
-// MGE_MonsterRPG.js
+// Mythic Games Engine - Knight Fall
+// KnightFall.js
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.MGE_MonsterRPG = true;
+Imported.KnightFalData = true;
 
 var Mythic = Mythic || {};
-Mythic.MonsterRPG = Mythic.MonsterRPG || {};
-Mythic.MonsterRPG.version = 1;
+Mythic.KnightFall = Mythic.KnightFall || {};
+Mythic.KnightFall.version = 1;
 
 //=============================================================================
 /*: 
@@ -27,9 +27,9 @@ Mythic.MonsterRPG.version = 1;
 // Set Player Meta
 //=============================================================================
 
-Mythic.MonsterRPG.aliasItemInit = Game_Item.prototype.initialize;
+Mythic.KnightFall.aliasItemInit = Game_Item.prototype.initialize;
 Game_Item.prototype.initialize = function(item) {
-    Mythic.MonsterRPG.aliasItemInit.call(this, item);
+    Mythic.KnightFall.aliasItemInit.call(this, item);
     this.setMeta(item);
 };
 
@@ -57,13 +57,13 @@ Game_Item.prototype.setMeta = function(item){
 //     }
 // };
 
-Mythic.MonsterRPG.aliasActorInit = Game_Actor.prototype.initialize;
+Mythic.KnightFall.aliasActorInit = Game_Actor.prototype.initialize;
 Game_Actor.prototype.initialize = function(actorId) {
-    Mythic.MonsterRPG.aliasActorInit.call(this, actorId);
-    Mythic.MonsterRPG.convertActorMeta.call(this, actorId);
+    Mythic.KnightFall.aliasActorInit.call(this, actorId);
+    Mythic.KnightFall.convertActorMeta.call(this, actorId);
 };
 
-Mythic.MonsterRPG.convertActorMeta = function(actorId){
+Mythic.KnightFall.convertActorMeta = function(actorId){
     let actor = $dataActors[actorId];
     if(!actor) return;
     if(actor.meta._fly) Mythic.MetaCore.convertMetaToProperty(actor, '_movementTypes', '_fly', actor.meta._fly);
@@ -77,9 +77,9 @@ Mythic.MonsterRPG.convertActorMeta = function(actorId){
 // Set Event Meta
 //=============================================================================
 
-Mythic.MonsterRPG.aliasEventInit = Game_Event.prototype.initialize;
+Mythic.KnightFall.aliasEventInit = Game_Event.prototype.initialize;
 Game_Event.prototype.initialize = function(mapId, eventId) {
-    Mythic.MonsterRPG.aliasEventInit.call(this, mapId, eventId);
+    Mythic.KnightFall.aliasEventInit.call(this, mapId, eventId);
     this.setEventMeta(eventId);
 };
 
@@ -207,7 +207,7 @@ Game_Event.prototype.SpawnEggBehindMonster = function(character){
 Game_Enemy.prototype.initialize = function(enemyId, x, y) {
     Game_Battler.prototype.initialize.call(this);
     this.setup(enemyId, x, y);
-    Mythic.MonsterRPG.setEnemyMeta.call(this, enemyId);
+    Mythic.KnightFall.setEnemyMeta.call(this, enemyId);
     this.recoverAll();
 };
 
@@ -246,7 +246,7 @@ Game_Enemy.prototype.initialize = function(enemyId, x, y) {
 
     
 
-Mythic.MonsterRPG.setEnemyMeta = function(enemyId){
+Mythic.KnightFall.setEnemyMeta = function(enemyId){
     let meta = $dataEnemies[enemyId].meta;
     if(meta.DropItems){
         this._dropItems = Mythic.MetaCore.convertMultiArray.call(this, meta.DropItems, ',', '-')
@@ -294,10 +294,10 @@ Game_Enemy.prototype.setParams = function(meta, enemyId){
     this._paramPlus[7] = this.addLevels(this._agiGrowth, 7);
     this._paramPlus[8] = this.addLevels(this._lukGrowth, 8);
 
-    this._hp = this._paramPlus[0] + this._hp;
-    this._mp = this._paramPlus[1] + this._mp;
-    this._tp = this._paramPlus[2] + this._tp;
-    console.log(this._lvl, this._statBonuses);
+    this._hp = this._paramPlus[0];
+    this._mp = this._paramPlus[1];
+    this._tp = this._paramPlus[2];
+    console.log(this._lvl, this._hp, this.mhp, this._classParams[0]);
 }
 
 Game_Enemy.prototype.initStatBonuses = function(){
@@ -326,16 +326,15 @@ Game_Enemy.prototype.setBonus = function(stat){
 }
 
 Game_Enemy.prototype.addLevels = function(param, ind){
-    let newParam = [ind == 2 ? 0 : 1, ind];
-    // let base = $dataEnemies[this._enemyId].params[i] || 0;
-    let result = 0;
+    let newParam = [ind == 1 ? 0 : 1];
+    let result = this._baseParams[ind];
     for (let i = 0; i < 98; i++){
         result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
         newParam.push(result);
     }
-    for(let i = 0; i < this._lvl; i++){
-        result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
-    }
+    // for(let i = 0; i < this._lvl; i++){
+    //     result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
+    // }
     this._classParams.push(newParam);
     return newParam[this._lvl + 1];
 }
@@ -345,9 +344,9 @@ Game_Enemy.prototype.addLevels = function(param, ind){
 // Game_Map
 //=============================================================================
 
-Mythic.MonsterRPG.aliasMapSetup = Game_Map.prototype.setup;
+Mythic.KnightFall.aliasMapSetup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
-    Mythic.MonsterRPG.aliasMapSetup.call(this, mapId);
+    Mythic.KnightFall.aliasMapSetup.call(this, mapId);
     this.setMapMeta($dataMap.meta);
 };
 
@@ -375,15 +374,15 @@ Game_Map.prototype.setLureEncounters = function(meta){
 // Game_Battler
 //=============================================================================
 
-Mythic.MonsterRpg.aliasGameBattlerInit = Game_BattlerBase.prototype.initMembers;
+Mythic.KnightFall.aliasGameBattlerInit = Game_BattlerBase.prototype.initMembers;
 Game_BattlerBase.prototype.initMembers = function() {
-    Mythic.MonsterRpg.aliasGameBattlerInit.call(this)
+    Mythic.KnightFall.aliasGameBattlerInit.call(this)
 
-    Mythic.MonsterRpg.initAptitudes.call(this);
-    Mythic.MonsterRpg.initTypes.call(this);
+    Mythic.KnightFall.initAptitudes.call(this);
+    Mythic.KnightFall.initTypes.call(this);
 };
 
-Mythic.MonsterRpg.initAptitudes = function(){
+Mythic.KnightFall.initAptitudes = function(){
     this._typeAptitudes = {
         _fire: 0,
         _water: 0,
@@ -402,7 +401,7 @@ Mythic.MonsterRpg.initAptitudes = function(){
 
 
 
-Mythic.MonsterRPG.initTypes = function(){
+Mythic.KnightFall.initTypes = function(){
     this._elementalTypes = {
         _fire: false,
         _water: false,
@@ -413,6 +412,6 @@ Mythic.MonsterRPG.initTypes = function(){
     }
 }
 
-Mythic.MonsterRPG.update = function(){
+Mythic.KnightFall.update = function(){
     
 };
