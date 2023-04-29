@@ -33,6 +33,13 @@ Mythic.MetaCore.convertMetaToProperty = function(actor, propertyLocation, proper
     actor[propertyLocation][propertyName] = propertyValue;
 }
 
+Mythic.MetaCore.convertMetaArrayToProperty = function(actor, propertyLocation, arr){
+    if(!actor[propertyLocation]) {
+        actor[propertyLocation] = [];
+    }
+    arr.map( (el, i) => { actor[propertyLocation][i] = el });
+};
+
 Mythic.MetaCore.CleanMetaData = function(meta){
     return meta.replaceAll('\n', '');
 }

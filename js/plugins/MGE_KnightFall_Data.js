@@ -71,6 +71,7 @@ Mythic.KnightFall.convertActorMeta = function(actorId){
     if(actor.meta._phase) Mythic.MetaCore.convertMetaToProperty(actor, '_movementTypes', '_phase', actor.meta._phase);
     if(actor.meta._teleport) Mythic.MetaCore.convertMetaToProperty(actor, '_movementTypes', '_teleport', actor.meta._teleport);
     if(actor.meta._swim) Mythic.MetaCore.convertMetaToProperty(actor, '_movementTypes', '_swim', actor.meta._swim);
+    if(actor.meta._canTame) Mythic.MetaCore.convertMetaArrayToProperty(actor, '_canTame', Mythic.MetaCore.getArrayFromMetaData(actor.meta._canTame, ','))
 }
 
 //=============================================================================
@@ -297,6 +298,8 @@ Game_Enemy.prototype.setParams = function(meta, enemyId){
     this._hp = this._paramPlus[0];
     this._mp = this._paramPlus[1];
     this._tp = this._paramPlus[2];
+
+    console.log(this._lvl, this._statBonuses, this._classParams)
 }
 
 Game_Enemy.prototype.initStatBonuses = function(){
@@ -311,11 +314,12 @@ Game_Enemy.prototype.initStatBonuses = function(){
         this.setBonus(),
         this.setBonus(),
         this.setBonus(),
-        this.setBonus()
+        this.setBonus(),
+        1
     ]
 }
 
-Game_Enemy.prototype.setBonus = function(stat){
+Game_Enemy.prototype.setBonus = function(){
     let score = [45, 70, 92]
     let roll = Math.floor(Math.random() * 100)
     if(roll <= score[0]) return 1
@@ -326,7 +330,7 @@ Game_Enemy.prototype.setBonus = function(stat){
 
 Game_Enemy.prototype.addLevels = function(param, ind){
     let newParam = [];
-    let result = this._baseParams[ind];
+    let result = ind == 8 ? 1 : this._baseParams[ind];
     for (let i = 0; i < 98; i++){
         result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
         newParam.push(result);

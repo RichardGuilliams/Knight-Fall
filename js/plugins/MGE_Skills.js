@@ -158,7 +158,8 @@ Game_Enemy.prototype.steal = function() {
 
 Game_Enemy.prototype.catch = function(subject, target, effect) {
     if ($gameParty.inBattle()) {
-        if(target._catchDifficulty){
+        if(!this.matchingType(subject)) BattleManager._logWindow.addText(`A ${$dataActors[subject._actorId].name} cannot tame a ${$dataEnemies[this._enemyId].name}`);
+        else if(target._catchDifficulty){
             if(this.checkCatchSuccess(subject, target)) this.catchSuccess();
             else BattleManager._logWindow.addText(`You failed to tame this monster.`);
         }
@@ -166,6 +167,14 @@ Game_Enemy.prototype.catch = function(subject, target, effect) {
     }
     Game_Battler.prototype.performDamage.call(this);
 };
+
+Game_Enemy.prototype.matchingType = function(subject){
+    let match = false;
+    $dataActors[subject._actorId]._canTame.map( el => {
+        if(this._types.contains(el)) match = true;
+    })
+    return match;
+}
 
 Game_Enemy.prototype.checkCatchSuccess = function(subject, target){
     let roll = Mythic.Core.RandomNumber((subject.agi + subject.luk) * subject._level);
@@ -175,7 +184,7 @@ Game_Enemy.prototype.checkCatchSuccess = function(subject, target){
 
 Game_Enemy.prototype.catchSuccess = function(){
     this._hp = 0;
-    let newMonsterId = $dataActors.find( (el) => { if(el != undefined) return el.name == 'Slime' }).id;
+    let newMonsterId = $dataActors.find( (el) => { if(el != undefined) return el.name == $dataEnemies[this._enemyId].name }).id;
     this.initNewMonster(newMonsterId);
 };
 
@@ -189,7 +198,6 @@ Game_Enemy.prototype.initNewMonster = function(newMonsterId){
         else el[this._lvl] += 1;
     });
     $dataClasses[$dataClasses.length - 1].params = this._classParams;
-    console.log($dataClasses[$dataClasses.length - 1].params)
     // debugger;
     monster.classId = $dataClasses.length - 1;
     $gameParty.addActor($dataActors.length - 1);
