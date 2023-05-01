@@ -4,7 +4,7 @@
 //=============================================================================
 
 var Imported = Imported || {};
-Imported.KnightFalData = true;
+Imported.KnightFallData = true;
 
 var Mythic = Mythic || {};
 Mythic.KnightFall = Mythic.KnightFall || {};
@@ -36,6 +36,8 @@ Game_Item.prototype.initialize = function(item) {
 Game_Item.prototype.setMeta = function(item){
     // console.log(this);
 }
+
+
 
 //=============================================================================
 // Set Player Meta
@@ -92,6 +94,14 @@ Game_Event.prototype.setEventMeta = function(eventId){
     this.meta = $dataMap.events[eventId].meta
     if(this.meta.Breeding) this.setBreedingData();
     if(this.meta.Monster) this.setMonsterData();
+    if(this.meta.HarvestItem) this.setHarvestData();
+    if(this.meta.Spawn) this._spawn = true;
+}
+
+Game_Event.prototype.setHarvestData = function(){
+    let data = Mythic.MetaCore.getArrayFromMetaData(this.meta.HarvestItem, '-');
+    // Mythic.MetaCore.ArrayToObject(data, '_harvestData', );
+    this._harvestData = Mythic.MetaCore.convertArrayToObject(['_itemType', '_itemName', '_itemMin', '_itemMax', '_itemRefresh'], data);
 }
 
 Game_Event.prototype.setMonsterData = function(){

@@ -29,7 +29,7 @@ Mythic.CopyCore.version = 1;
 // Core Functions
 //=============================================================================
 
-Mythic.Core.CopyObjectData = function(data){
+Mythic.CopyCore.CopyObjectData = function(data){
     return JSON.parse(JSON.stringify(data));
 }
 
@@ -38,7 +38,7 @@ Mythic.Core.CopyObjectData = function(data){
 //=============================================================================
 
 Mythic.CopyCore.CopyToData = function(objArr, objId){
-    let obj = Mythic.Core.CopyObjectData(objArr[objId]);
+    let obj = Mythic.CopyCore.CopyObjectData(objArr[objId]);
     obj.id = objArr.length;
     objArr.push(obj);
 }

@@ -22,6 +22,11 @@ Mythic.Core.version = 1;
  * - Finished plugin!
 */
 //=============================================================================
+Mythic.Core.timeInSeconds = 60;
+Mythic.Core.timeInMinutes = this.timeInSeconds * 60
+Mythic.Core.timeInHours = this.timeInMinutes * 60
+Mythic.Core.timeInDays = this.timeInHours * 24
+
 
 Mythic.Core.MapData = {
     dataMap: null,
