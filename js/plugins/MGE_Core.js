@@ -58,6 +58,10 @@ DataManager.extractSaveContents = function(contents) {
     Mythic.Core.MapData     = contents.mapData;
 };
 
+Mythic.Core.GetInterpreterEvent = function(){
+    return $gameMap._events[$gameMap._interpreter._eventId];
+}
+
 Mythic.Core.ToBoolean = function(str){
     if(str === 'true') return true;
     return false;

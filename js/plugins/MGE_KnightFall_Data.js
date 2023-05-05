@@ -223,23 +223,49 @@ NPCShop.prototype.SHOP_CODE = 302;
 NPCShop.prototype.ITEM_CODE = 605;
 
 NPCShop.prototype.setup = function(type){
+    this.inventory = [];
     switch(type){
-        case 'Hunter': return this.setupHunterInventory();
-        case 'Forager': return this.setupForagerInventory();
-        case 'Miner': return this.setupMinerInventory();
-        case 'Armorer': return this.setupArmorerInventory();
-        case 'Blacksmith': return this.setupBlacksmithInventory();
-        case 'Alchemist': return this.setupAlchemistInventory();
-        case 'Enchanter': return this.setupEnchanterInventory();
+        case 'Hunter':
+            this.type = 'Hunter';
+            this.setupHunterInventory();
+            this.createRandomInventory();
+            SceneManager.push(Scene_Shop);
+            SceneManager.prepareNextScene(this.inventory, this.inventory[0][4]); 
+            break;
+        case 'Forager': 
+            this.setupForagerInventory();
+            this.createRandomInventory();
+            break; 
+        case 'Miner': 
+            this.setupMinerInventory();
+            this.createRandomInventory();
+            break; 
+        case 'Armorer': 
+            this.setupArmorerInventory();
+            this.createRandomInventory();
+            break; 
+        case 'Blacksmith': 
+            this.setupBlacksmithInventory();
+            this.createRandomInventory();
+            break; 
+        case 'Alchemist': 
+            this.setupAlchemistInventory();
+            this.createRandomInventory();
+            break; 
+        case 'Enchanter': 
+            this.setupEnchanterInventory();
+            this.createRandomInventory();
+            break;
+        case 'Merchant': 
+            this.setupMerchantInventory();
+            this.createRandomInventory();
+            break; 
     }
 };
 
 NPCShop.prototype.addItem = function(item){
-    return {
-        code: this.inventory.length > 0 ? 605 : 302,
-        indent: 0,
-        parameters: [item[0], item[1], item[2], item[3], item[4] ? item[4] : undefined]
-    }
+    if(this.inventory.length == 0) item.push(false);
+    this.inventory.push(item);
 };
 
 
@@ -301,25 +327,32 @@ NPCShop.prototype.setupEnchanterInventory = function(){
     this.setMinMaxArmors(0, 2);
 };
 
+NPCShop.prototype.setupMerchantInventory = function(){
+    this.setMinMaxItems(5, 10);
+    this.setMinMaxWeapons(5, 8);
+    this.setMinMaxArmors(3, 7);
+};
+
+
 NPCShop.prototype.createRandomInventory = function(){
     let itemNumber = Mythic.Core.RandomNumber(this.maxItems + 1 - this.minItems) + this.minItems;
     let weaponNumber = Mythic.Core.RandomNumber(this.maxWeapons + 1 - this.minWeapons) + this.minWeapons;
     let armorNumber = Mythic.Core.RandomNumber(this.maxArmors + 1 - this.minArmors) + this.minArmors;
-    this.setRandomItems(itemNumber);
+    this.setRandomItems(this.ITEM, $dataItems, itemNumber);
+    this.setRandomItems(this.WEAPON, $dataWeapons, weaponNumber);
+    this.setRandomItems(this.ARMOR, $dataArmors, armorNumber);
 }
 
-NPCShop.prototype.createRandom.setRandomItems = function(itemNumber){
-
+NPCShop.prototype.setRandomItems = function(dataId, data, itemNumber){
+    let items = []; 
+    data.map( item => {
+        if(!item) return;
+        if(item.meta[this.type]) items.push(item);
+    })
+    for(let i = 0; i < itemNumber; i++){
+        this.addItem([dataId, i + 1, 0, 0]);
+    }
 }
-
-NPCShop.prototype.createRandom.setRandomArmors = function(armorNumber){
-    
-}
-
-NPCShop.prototype.createRandom.setRandomWeapons = function(itemWeapons){
-    
-}
-
 
 
 //=============================================================================
@@ -380,6 +413,7 @@ Game_Event.prototype.setEventMeta = function(eventId){
     if(this.meta.Monster) this.setMonsterData();
     if(this.meta.HarvestItem) this.setHarvestData();
     if(this.meta.Spawn) this._spawn = true;
+    if(this.meta.Shop) this._shop = new NPCShop(this.meta.ShopType);
 }
 
 Game_Event.prototype.setHarvestData = function(){
