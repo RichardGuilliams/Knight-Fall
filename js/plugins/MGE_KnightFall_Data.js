@@ -38,6 +38,289 @@ Game_Item.prototype.setMeta = function(item){
 }
 
 
+//=============================================================================
+// Flash Manager
+//=============================================================================
+
+function FlashManager(){
+    this.initialize.apply(this, arguments);
+}
+
+FlashManager.prototype.initialize = function(speed, parent){
+    this._flashSpeed = speed;
+    this._parent = parent;
+    this._started = false;
+    this._cycle = 0;
+    this._rgb = [0, 0, 0, 0];
+    this._channelLimit = [0, 0, 0, 0];
+    this._channelIntensity = [0, 0, 0, 0];
+}
+
+FlashManager.prototype.defaultIntensity = 4;
+
+FlashManager.prototype.setChannelLimit = function(...limits){
+    this._channelLimit = limits;
+}
+
+FlashManager.prototype.setChannelIntensity = function(...intensity){
+    this._channelIntensity = intensity;
+}
+
+FlashManager.prototype.start = function(){
+    this._cycle = 1;
+    this._started = true;
+}
+
+FlashManager.prototype.stop = function(){
+    this._cycle = 0;
+    this._started = false;
+    this._rgb = [0, 0, 0, 0];
+    this._channelIntensity = [0, 0, 0, 0];
+    this._channelLimit = [0, 0, 0, 0];
+    this._parent.characterSprite()._colorTone = [0, 0, 0, 0]
+}
+
+FlashManager.prototype.flashBlue = function(){
+    this._rgb = [0, 0, 0, 0];
+    this._channelIntensity = [0, 0, this.defaultIntensity, 0];
+    this._channelLimit = [0, 0, 144, 0];
+    this._cycle = 1;
+    this._started = true;
+}
+
+FlashManager.prototype.flashGreen = function(){
+    this._rgb = [0, 0, 0, 0];
+    this._channelIntensity = [0, this.defaultIntensity, 0, 0];
+    this._channelLimit = [0, 144, 0, 0];
+    this._cycle = 1;
+    this._started = true;
+}
+
+
+FlashManager.prototype.flashRed = function(){
+    this._rgb = [0, 0, 0, 0];
+    this._channelIntensity = [this.defaultIntensity, 0, 0, 0];
+    this._channelLimit = [144, 0, 0, 0];
+    this._cycle = 1;
+    this._started = true;
+}
+
+FlashManager.prototype.flashWhite = function(){
+    this._rgb = [0, 0, 0, 0];
+    this._channelIntensity = [4, 4, 4, 0];
+    this._channelLimit = [120, 120, 120, 0];
+    this._cycle = 1;
+    this._started = true;
+}
+
+FlashManager.prototype.flashTurquoise = function(){
+    this._rgb = [0, 0, 0, 0];
+    this._channelIntensity = [0, this.defaultIntensity, this.defaultIntensity, 0];
+    this._channelLimit = [0, 120, 120, 0];
+    this._cycle = 1;
+    this._started = true;
+}
+
+FlashManager.prototype.flashPink = function(){
+    this._rgb = [0, 0, 0, 0];
+    this._channelIntensity = [this.defaultIntensity * 2, this.defaultIntensity, this.defaultIntensity, 0];
+    this._channelLimit = [240, 120, 120, 0];
+    this._cycle = 1;
+    this._started = true;
+}
+
+
+FlashManager.prototype.update = function(){
+    if (this._started == true){
+        this.updateChannels();
+        // this.updateChannel2();
+        // this.updateChannel3();
+        // this.updateChannel4();
+        this._parent.characterSprite()._colorTone = this._rgb;
+    }
+}
+
+FlashManager.prototype.updateChannels = function(){
+    this._rgb.forEach( (channel, i) => {
+        this.updateChannel(i);
+    })
+}
+
+FlashManager.prototype.updateChannel2 = function(){
+    
+}
+
+FlashManager.prototype.updateChannel = function(i){
+    if(this._channelLimit[i] > 0){
+        if(this._cycle == 1){
+            if(this._rgb[i] >= this._channelLimit[i]){
+                this._rgb[i] = this._channelLimit[i] - this.defaultIntensity;
+                this._cycle = -1;
+            } 
+            else{ 
+            this._rgb[i] += this._channelIntensity[i];
+            // this._rgb[i] <= this._channelLimit[i]
+            }
+        }
+        else if(this._rgb[i] >= 0 && this._cycle == -1){
+            if(this._rgb[i] <= 0){
+                this._rgb[i] = 0 + this.defaultIntensity;
+                this._cycle = 1;
+            } 
+            else this._rgb[i] -= this._channelIntensity[i];
+        }  
+    }
+}
+
+
+
+// FlashManager.prototype.updateChannel3 = function(){
+//     console.log('update channel')
+//     if(this._channelLimit[2] > 0 && this._rgb[2] <= this._channelLimit[2] && this._cycle == 1){
+//         this._rgb[2] += this._channelIntensity[2];
+//         if(this._rgb[2] >= this._channelLimit[2]){
+//             this._rgb[2] = this._channelLimit[2];
+//             this._cycle = -1;
+//         } 
+//     }
+//     else if(this._rgb[2] >= 0 && this._cycle == -1){
+//         this._rgb[2] -= this._channelIntensity[2];
+//         if(this._rgb[2] <= 0){
+//             this._rgb[2] = 0;
+//             this._cycle = 1;
+//         } 
+//     }  
+// }
+
+FlashManager.prototype.updateChannel4 = function(){
+    
+}
+
+
+//=============================================================================
+// NPC Shop
+//=============================================================================
+
+function NPCShop(){
+    this.initialize.apply(this, arguments);
+}
+
+NPCShop.prototype.initialize = function(){
+    this.type = '';
+    this.inventory = [];
+    this.minItems = 0;
+    this.maxItems = 0;
+    this.minWeapons = 0;
+    this.maxWeapons = 0;
+    this.minArmors = 0;
+    this.maxArmors = 0;
+};
+
+NPCShop.prototype.ITEM = 0;
+NPCShop.prototype.WEAPON = 1;
+NPCShop.prototype.ARMOR = 2;
+NPCShop.prototype.SHOP_CODE = 302;
+NPCShop.prototype.ITEM_CODE = 605;
+
+NPCShop.prototype.setup = function(type){
+    switch(type){
+        case 'Hunter': return this.setupHunterInventory();
+        case 'Forager': return this.setupForagerInventory();
+        case 'Miner': return this.setupMinerInventory();
+        case 'Armorer': return this.setupArmorerInventory();
+        case 'Blacksmith': return this.setupBlacksmithInventory();
+        case 'Alchemist': return this.setupAlchemistInventory();
+        case 'Enchanter': return this.setupEnchanterInventory();
+    }
+};
+
+NPCShop.prototype.addItem = function(item){
+    return {
+        code: this.inventory.length > 0 ? 605 : 302,
+        indent: 0,
+        parameters: [item[0], item[1], item[2], item[3], item[4] ? item[4] : undefined]
+    }
+};
+
+
+NPCShop.prototype.setMinMaxItems = function(min, max){
+    this.minItems = min;
+    this.maxItems = max;
+}
+
+NPCShop.prototype.setMinMaxWeapons = function(min, max){
+    this.minWeapons = min;
+    this.maxWeapons = max;
+}
+
+NPCShop.prototype.setMinMaxArmors = function(min, max){
+    this.minArmors = min;
+    this.maxArmors = max;
+}
+
+
+NPCShop.prototype.setupHunterInventory = function(){
+    this.setMinMaxItems(3, 7);
+    this.setMinMaxWeapons(0, 3);
+    this.setMinMaxArmors(0, 2);    
+};
+
+NPCShop.prototype.setupForagerInventory = function(){
+    this.setMinMaxItems(3, 9);
+    this.setMinMaxWeapons(0, 1);
+    this.setMinMaxArmors(0, 0);
+};
+
+NPCShop.prototype.setupMinerInventory = function(){
+    this.setMinMaxItems(3, 9);
+    this.setMinMaxWeapons(0, 2);
+    this.setMinMaxArmors(0, 2);
+};
+
+NPCShop.prototype.setupArmorerInventory = function(){
+    this.setMinMaxItems(1, 4);
+    this.setMinMaxWeapons(0, 0);
+    this.setMinMaxArmors(3, 8);
+};
+
+NPCShop.prototype.setupBlacksmithInventory = function(){
+    this.setMinMaxItems(1, 4);
+    this.setMinMaxWeapons(3, 9);
+    this.setMinMaxArmors(2, 5);
+};
+
+NPCShop.prototype.setupAlchemistInventory = function(){
+    this.setMinMaxItems(3, 7);
+    this.setMinMaxWeapons(0, 0);
+    this.setMinMaxArmors(0, 0);
+};
+
+NPCShop.prototype.setupEnchanterInventory = function(){
+    this.setMinMaxItems(3, 7);
+    this.setMinMaxWeapons(0, 3);
+    this.setMinMaxArmors(0, 2);
+};
+
+NPCShop.prototype.createRandomInventory = function(){
+    let itemNumber = Mythic.Core.RandomNumber(this.maxItems + 1 - this.minItems) + this.minItems;
+    let weaponNumber = Mythic.Core.RandomNumber(this.maxWeapons + 1 - this.minWeapons) + this.minWeapons;
+    let armorNumber = Mythic.Core.RandomNumber(this.maxArmors + 1 - this.minArmors) + this.minArmors;
+    this.setRandomItems(itemNumber);
+}
+
+NPCShop.prototype.createRandom.setRandomItems = function(itemNumber){
+
+}
+
+NPCShop.prototype.createRandom.setRandomArmors = function(armorNumber){
+    
+}
+
+NPCShop.prototype.createRandom.setRandomWeapons = function(itemWeapons){
+    
+}
+
+
 
 //=============================================================================
 // Set Player Meta
@@ -92,6 +375,7 @@ Game_CharacterBase.prototype.ticksInMinutes = Game_CharacterBase.prototype.ticks
 Game_Event.prototype.setEventMeta = function(eventId){
     this.name = $dataMap.events[eventId].name;
     this.meta = $dataMap.events[eventId].meta
+    if(!this._flashManager) this._flashManager = new FlashManager(6, this);
     if(this.meta.Breeding) this.setBreedingData();
     if(this.meta.Monster) this.setMonsterData();
     if(this.meta.HarvestItem) this.setHarvestData();
@@ -130,6 +414,7 @@ Game_Event.prototype.update = function() {
     Game_Character.prototype.update.call(this);
     this.checkEventTriggerAuto();
     this.updateParallel();
+    if(this._flashManager) this._flashManager.update();
     if(this.canBreed) this.updateBreeding();
 };
 
@@ -160,18 +445,21 @@ Game_Event.prototype.outOfYBreedingRange = function(event){
 }
 
 Game_Event.prototype.characterSprite = function(){   
-    let sprite;
-    SceneManager._scene.children[0]._characterSprites.forEach( (character, i) => {
-        if(character._character._eventId == this._eventId){
-            sprite = SceneManager._scene.children[0]._characterSprites[i]
-        } 
+    // let sprite; 
+    // SceneManager._scene.children[0]._characterSprites.forEach( (character, i) => {
+    //     if(character._character._eventId == this._eventId){
+    //         sprite = SceneManager._scene.children[0]._characterSprites[i]
+    //     } 
             
-    })
+    // })
+    let sprite = SceneManager._scene.children[0]._characterSprites.find( el => el._character._eventId == this._eventId);   
     return sprite;
 }
 
 Game_Event.prototype.breed = function(character){
-    if(this.isBreeding == false) this.isBreeding = true;
+    if(this.isBreeding == false){
+        this.isBreeding = true;
+    } 
     else {
         if(this.breedingTime > 0) {
             this.breedingTime = this.breedingTime - 1;
@@ -222,62 +510,43 @@ Game_Enemy.prototype.initialize = function(enemyId, x, y) {
     this.recoverAll();
 };
 
-    //Param
-    //MHP = 0
-    //MMP = 1
-    //ATK = 2
-    //DEF = 3
-    //MAT = 4
-    //MDF = 5
-    //AGI = 6
-    //LUK = 7
-
-    // XParam
-    //HIT = 0
-    //EVA = 1
-    //CRI = 2
-    //CEV = 3
-    //MEV = 4
-    //MRF = 5
-    //CNT = 6
-    //HRG = 7
-    //MRG = 8
-    //TRG = 9
-
-    // TarGet Rate 0
-    // GuaRD effect rate 1
-    // RECovery effect rate 2
-    // PHArmacology 3
-    // Mp Cost Rate 4
-    // Tp Charge Rate 5
-    // Physical Damage Rate 6
-    // Magical Damage Rate 7
-    // Floor Damage Rate 8
-    // EXperience Rate 9
-
-    
-
 Mythic.KnightFall.setEnemyMeta = function(enemyId){
     let meta = $dataEnemies[enemyId].meta;
-    if(meta.DropItems){
-        this._dropItems = Mythic.MetaCore.convertMultiArray.call(this, meta.DropItems, ',', '-')
-        this._dropItems.map( (item, i) => { this._dropItems[i] = Mythic.MetaCore.convertArrayToObject(
-            ['_type', '_name', '_quantity', '_dropChance'],
-            [item[0], item[1], item[2], item[3]]
-        )})
-    } 
-    if(meta.StealItems){
-        this._stealItems = Mythic.MetaCore.convertMultiArray.call(this, meta.StealItems, ',', '-')
-        this._stealItems.map( (item, i) => { this._stealItems[i] = Mythic.MetaCore.convertArrayToObject(
-            ['_type', '_name', '_quantity', '_stealChance'],
-            [item[0], item[1], item[2], item[3]]
-        )})
-    } 
+    this.setStealItems(meta);
+    this.setDropItems(meta);
     if(meta.Rank) this._rank = meta.Rank;
     if(meta.Types) this._types = Mythic.MetaCore.getArrayFromMetaData(meta.Types, ',')
     if(meta.CatchDifficulty) this._catchDifficulty = parseInt(meta.CatchDifficulty)
-    this._lvl = Math.floor(Math.random() * $gameMap._maxLvl) + $gameMap._minLvl;
+    this._level = Math.floor(Math.random() * $gameMap._maxLvl) + $gameMap._minLvl;
     this.setParams(meta, enemyId);
+}
+
+Game_Enemy.prototype.setDropItems = function(meta){
+    if(meta.DropItems){
+        this._dropItems = Mythic.MetaCore.convertMultiArray.call(this, meta.DropItems, ',', '-')
+        this._dropItems.map( (item, i) => { 
+            let arr = Mythic.Core.GetGameDataByName(item[0]);
+            let dataItem = arr[Mythic.Core.GetIDByName(arr, item[1])]; 
+            this._dropItems[i] = Mythic.MetaCore.convertArrayToObject(
+                ['item', 'quantity', 'dropChance'],
+                [dataItem, item[2], item[3]]
+            )
+        })
+    } 
+}
+
+Game_Enemy.prototype.setStealItems = function(meta){
+    if(meta.StealItems){
+        this._stealItems = Mythic.MetaCore.convertMultiArray.call(this, meta.StealItems, ',', '-')
+        this._stealItems.map( (item, i) => { 
+            let arr = Mythic.Core.GetGameDataByName(item[0]);
+            let dataItem = arr[Mythic.Core.GetIDByName(arr, item[1])]; 
+            this._stealItems[i] = Mythic.MetaCore.convertArrayToObject(
+                ['item', 'quantity', 'chance'],
+                [dataItem, item[2], item[3]]
+            )
+        })
+    } 
 }
 
 Game_Enemy.prototype.setParams = function(meta, enemyId){
@@ -309,7 +578,6 @@ Game_Enemy.prototype.setParams = function(meta, enemyId){
     this._mp = this._paramPlus[1];
     this._tp = this._paramPlus[2];
 
-    console.log(this._lvl, this._statBonuses, this._classParams)
 }
 
 Game_Enemy.prototype.initStatBonuses = function(){
@@ -345,11 +613,11 @@ Game_Enemy.prototype.addLevels = function(param, ind){
         result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
         newParam.push(result);
     }
-    // for(let i = 0; i < this._lvl; i++){
+    // for(let i = 0; i < this._level; i++){
     //     result += Mythic.Core.RandomNumberNoZero(this._statBonuses[ind] + param);
     // }
     this._classParams.push(newParam);
-    return newParam[this._lvl];
+    return newParam[this._level];
 }
 
 
@@ -425,6 +693,17 @@ Mythic.KnightFall.initTypes = function(){
     }
 }
 
+
+
 Mythic.KnightFall.update = function(){
     
 };
+
+function ProximityTracker(){
+    this.initialize.apply(this, arguments);
+}
+
+ProximityTracker.initialize = function(range){
+    this._parent = null;
+    this.range = range;
+}

@@ -1,0 +1,27 @@
+- Create Shop Object to initialize random shop inventory on vendor events
+- Create Loot object to initialize random loot in loot events
+- Create Search object to initialize random inventory in search events
+- Create Harvest object to track refresh timer for resource spawns
+- Create Talk object to initialize random conversations in npc events
+
+- Create eventAnimations object to events that will enable flashing when event is in a certain State
+Blue will be for breeding while red will be for when an enemy is within a certain range of the player and green 
+will be for neutral npcs.
+
+- Create window for monster fusion.
+- create window for monster stats and mutations
+- Create Window for item crafting.
+- Create window for item upgrading.
+- Create window for item enchanting.
+
+- Create mechanic for fishing as well as small minigame?
+
+- Create Trading mechanic to trade monsters with certain npcs.
+
+- Create a Commander function for building events that will allow the player to store monsters in a
+building. The buildings resource spawns will be altered based on the monster that is assigned to the building.
+
+
+
+
+

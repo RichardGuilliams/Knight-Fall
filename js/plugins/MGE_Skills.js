@@ -22,6 +22,33 @@ Mythic.Skills.version = 1;
 */
 //=============================================================================
 
+// function StealableItems(){
+//     this.initialize.apply(this, arguments);
+// }
+
+// StealableItems.prototype.initialize = function(){
+//     this.items = [];
+// }
+
+// StealableItems.prototype.addItem = function(item, quantity, chance){
+//     let item = { item, quantity, chance};
+//     this.items.push(item);
+// };
+
+// StealableItems.prototype.stealRate = function(subject, target){
+//     let attackingRoll = ((subject.luk * subject._level) + subject.agi);
+//     let defendingRoll = ((target.luk * target.lvl) + target.agi);
+//     return attackingRoll - defendingRoll / 2
+
+// };
+
+// StealableItems.prototype.steal = function(subject, target){
+//     let item = Mythic.Core.RandomNumber(this.items.length);
+//     let roll = Mythic.Core.RandomNumber(this.stealRate(subject, target));
+//     if(roll >= this.items[item].chance) return true;
+//     return false;
+// }
+
 //=============================================================================
 // Skills
 //=============================================================================
@@ -43,21 +70,6 @@ Mythic.Skills.Lure = function(){
     SceneManager.push(Scene_Battle);
 }
 
-Mythic.Skills.steal = function(arr){
-    let subject = BattleManager._action.subject()
-    let roll = Math.floor(Math.random() * ((subject.luk * subject.agi) * subject.level))
-    arr = arr.sort((a, b) => parseInt(a[3]) - parseInt(b[3]));
-    let winningItem = Math.floor(Math.random() * arr.length);
-    if(roll > arr[winningItem][3]){
-        let itemArr = Mythic.Core.GetGameDataByName(arr[winningItem][0]);
-        let number = Math.floor(Math.random() * arr[winningItem][2]) + 1;
-        let item = itemArr[Mythic.Core.GetIDByName(itemArr, arr[winningItem][1])];
-        $gameParty.gainItem(item, number, false);
-        BattleManager._logWindow.addText(`You stole ${number} ${item.name}!`);
-    }
-    else BattleManager._logWindow.addText(`You failed to steal anything`);
-
-}
 
 
 BattleManager.startAction = function() {
@@ -89,33 +101,33 @@ BattleManager.startAction = function() {
 // }
 
 // Game_Enemy.prototype.canSteal = function() {
-//     if (this.stealable && this.stealable.canSteal()) {
-//         return true;
-//     }
-//     return false;
-// };
+    //     if (this.stealable && this.stealable.canSteal()) {
+        //         return true;
+        //     }
+        //     return false;
+        // };
+        
+        //=============================================================================
+        // BattleManager
+        //=============================================================================
 
-//=============================================================================
-// BattleManager
-//=============================================================================
-
-Mythic.Skills.apply = Game_Action.prototype.apply;
-Game_Action.prototype.apply = function(target) {
-    if(this.item().meta.MGE_Skill){
-        this.processSpecialSkill();
-    }
-    Mythic.Skills.apply.call(this, target);
+        Mythic.Skills.apply = Game_Action.prototype.apply;
+        Game_Action.prototype.apply = function(target) {
+            if(this.item().meta.MGE_Skill){
+                this.processSpecialSkill();
+            }
+            Mythic.Skills.apply.call(this, target);
 };
 
 Mythic.Skills.applyItemEffect = Game_Action.prototype.applyItemEffect 
 Game_Action.prototype.applyItemEffect = function(target, effect) {
     Mythic.Skills.applyItemEffect.call(this, target, effect);
     switch (effect.code) {
-    case Game_Action.EFFECT_STEAL:
-        this.itemEffectSteal(target, effect);
-        break;
-    case Game_Action.EFFECT_CATCH:
-        this.itemEffectCatch($gameActors._data[this._subjectActorId], target, effect);
+        case Game_Action.EFFECT_STEAL:
+            this.itemEffectSteal(target, effect);
+            break;
+            case Game_Action.EFFECT_CATCH:
+                this.itemEffectCatch($gameActors._data[this._subjectActorId], target, effect);
         break;
     }
 };
@@ -140,23 +152,18 @@ Game_Action.prototype.processSpecialSkill = function(){
     }   
 }
 
-Game_Enemy.prototype.steal = function() {
+Game_Enemy.prototype.steal = function(){
     if ($gameParty.inBattle()) {
-        enemy = $dataEnemies[$gameTroop._enemies[BattleManager._action._targetIndex]._enemyId]
-        if(enemy.meta.StealItems){
-            let meta = enemy.meta.StealItems;
-            let items = Mythic.MetaCore.getArrayFromMetaData(meta, ',');
-            items.map( (el, i) => {
-                items[i] = el.split('-');
-            })
-            Mythic.Skills.steal(items);
+        // enemy = $dataEnemies[$gameTroop._enemies[BattleManager._action._targetIndex]._enemyId]
+        if(this._stealItems.length > 0){
+            this.performSteal();
         }
         else BattleManager._logWindow.addText(`There is nothing to steal`); 
     }
     Game_Battler.prototype.performDamage.call(this);
 };
 
-Game_Enemy.prototype.catch = function(subject, target, effect) {
+Game_Enemy.prototype.catch = function(subject, target) {
     if ($gameParty.inBattle()) {
         if(!this.matchingType(subject)) BattleManager._logWindow.addText(`A ${$dataActors[subject._actorId].name} cannot tame a ${$dataEnemies[this._enemyId].name}`);
         else if(target._catchDifficulty){
@@ -176,9 +183,26 @@ Game_Enemy.prototype.matchingType = function(subject){
     return match;
 }
 
-Game_Enemy.prototype.checkCatchSuccess = function(subject, target){
+Game_Enemy.prototype.performSteal = function(arr){
+    let subject = $gameParty.targetActor();
+    let item = this._stealItems[Mythic.Core.RandomNumber(this._stealItems.length)];
+    let roll = subject.stealthRoll();
+    console.log(roll); 
+    if(roll > item.chance){
+        let number = Mythic.Core.RandomNumber(item.quantity) + 1;
+        let itemIndex = this._stealItems.indexOf(item)
+        this._stealItems[itemIndex].quantity -= number;
+        if(this._stealItems[itemIndex].quantity <= 0) this._stealItems.splice(itemIndex, 1); 
+        $gameParty.gainItem(item.item, number, false);
+        BattleManager._logWindow.addText(`You stole ${number} ${item.item.name}!`);
+    }
+    else BattleManager._logWindow.addText(`You failed to steal anything`);
+
+}
+
+Game_Enemy.prototype.checkCatchSuccess = function(subject){
     let roll = Mythic.Core.RandomNumber((subject.agi + subject.luk) * subject._level);
-    let cr = (this.luk + this.agi + this.hp) * this._lvl;
+    let cr = (this.luk + this.agi + this.hp) * this._level;
     if(roll > cr) return true
 }
 
@@ -191,17 +215,18 @@ Game_Enemy.prototype.catchSuccess = function(){
 Game_Enemy.prototype.initNewMonster = function(newMonsterId){
     Mythic.CopyCore.CopyToData($dataActors, newMonsterId);
     let monster = $dataActors[$dataActors.length - 1];
-    monster.initialLevel = this._lvl;
+    monster.initialLevel = this._level;
     Mythic.CopyCore.CopyToData($dataClasses ,monster.classId);
     this._classParams.map( (el, i) => { 
         if(i == 1) return
-        else el[this._lvl] += 1;
+        else el[this._level] += 1;
     });
     $dataClasses[$dataClasses.length - 1].params = this._classParams;
     // debugger;
     monster.classId = $dataClasses.length - 1;
     $gameParty.addActor($dataActors.length - 1);
 };
+
 Game_Action.EFFECT_STEAL = 101;
 Game_Action.EFFECT_CATCH = 102;
 

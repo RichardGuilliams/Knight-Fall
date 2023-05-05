@@ -149,24 +149,11 @@ Mythic.Core.RandomNumberNoZero = function(max){
     else return 1
 }
 
-Game_Map.prototype.setupStartingMapEvent = function() {
-    var events = this.events();
-    for (var i = 0; i < events.length; i++) {
-        var event = events[i];
-        if (event.isStarting()) {
-            event.clearStartingFlag();
-            this._interpreter.setup(event.list(), event.eventId());
-            return true;
-        }
-    }
-    return false;
-};
-
 Mythic.Core.CleanArray = function(arr){
     arr.map( (el, i) => {
         if(i === 0) return;
         if(el != null) {
-            el.id = i;
+            arr[i].id = i;
         }
     })
 }
@@ -181,7 +168,7 @@ Mythic.Core.GetEventXWhileFlying = function(){
         // Left
         case 4:
             return $gamePlayer.x - 1
-                
+            
         // Right
         case 6:
             return $gamePlayer.x + 1
@@ -189,27 +176,27 @@ Mythic.Core.GetEventXWhileFlying = function(){
         // Up
         case 8:
             return $gamePlayer.x
+        }
     }
-}
-
-Mythic.Core.GetEventYWhileFlying = function(){
-    const direction = $gamePlayer.direction();
+    
+    Mythic.Core.GetEventYWhileFlying = function(){
+        const direction = $gamePlayer.direction();
     switch(direction){
         // Down
         case 2:
-        return $gamePlayer.y + 1
-            
-        // Left
-        case 4:
             return $gamePlayer.y + 1
+            
+            // Left
+            case 4:
+                return $gamePlayer.y + 1
                 
         // Right
         case 6:
             return $gamePlayer.y + 1
-                    
-        // Up
-        case 8:
-            return $gamePlayer.y - 1
+            
+            // Up
+            case 8:
+                return $gamePlayer.y - 1
     }
 }
 
@@ -299,6 +286,28 @@ Game_CharacterBase.prototype.isPlayer = function() {
 Game_CharacterBase.prototype.isEvent = function() {
     return this.constructor === Game_Event ? true : false;
 };
+Game_Battler.prototype.physicalAtk = function(){
+    return this.atk + Math.floor(this.agi / 4);
+}
+
+Game_Battler.prototype.magicAtk = function(){
+    return this.mat + Math.floor(this.agi / 4);
+}
+
+Game_Battler.prototype.physicalDef = function(){
+    return this.def + Math.floor(this.atk / 4);
+}
+
+Game_Battler.prototype.magicDef = function(){
+    return this.mdf + Math.floor(this.agi / 4);
+}
+
+Game_Battler.prototype.stealthRoll = function(){
+    return Mythic.Core.RandomNumber(this.agi + (this.luk * this._level)) + this.agi
+}
+
+
+
 
 //=============================================================================
 // DataManager
@@ -350,10 +359,41 @@ Sprite_Character.prototype.hasName = function(){
 // Map
 //=============================================================================
 
+Game_Map.prototype.allTilesInRegion = function(regionId){
+    let regionTiles = [];
+    for(let i = 0; i < this.width(); i++){
+        for(let j = 0; j < this.height(); j++){
+            if(this.regionId(i, j) == regionId) regionTiles.push([i, j])
+        }   
+    }
+    return regionTiles;
+}
+
+Game_Map.prototype.emptyTilesInRegion = function(regionId){
+    let emptyTiles = [];
+    this.allTilesInRegion(regionId).forEach( tile => {
+        if(this.eventIdXy(tile[0], tile[1]) == 0) emptyTiles.push(tile);
+    });
+    return emptyTiles;
+}
+
+Game_Map.prototype.setupStartingMapEvent = function() {
+    var events = this.events();
+    for (var i = 0; i < events.length; i++) {
+        var event = events[i];
+        if (event.isStarting()) {
+            event.clearStartingFlag();
+            this._interpreter.setup(event.list(), event.eventId());
+            return true;
+        }
+    }
+    return false;
+};
+
 Game_Map.prototype.eventId = function(){
     return $gameMap._interpreter._eventId;
 }
 
 Game_Map.prototype.event = function(){
-       return $gameMap._events[this.eventId()];
+    return $gameMap._events[this.eventId()];
 }

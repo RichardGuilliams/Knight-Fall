@@ -101,6 +101,19 @@ Game_Map.prototype.update = function(sceneActive) {
     EventSpawner.prototype.aliasMapUpdate.call(this, sceneActive);
     if(!Mythic.Core.MapData.events) return;
     if(this._monsterSpawner) this._monsterSpawner.update();
+    if(this._resourceSpawner) this._resourceSpawner.update();
+    if(this._shopSpawner) this._shopSpawner.update();
+    if(this._NPCSpawner) this._NPCSpawner.update();
+    if(this._lootSpawner) this._lootSpawner.update();
+};
+
+Mythic.EventSpawner.aliasEraseEvent = Game_Map.prototype.eraseEvent;
+Game_Map.prototype.eraseEvent = function(eventId) {
+    // if(this._events[eventId]) Mythic.EventSpawner.aliasEraseEvent.call(this, eventId);
+    this._events.find( event => {
+        if(!event) return 
+        else return  event._eventId == eventId
+    }).erase();
 };
 
 //=============================================================================
@@ -127,7 +140,6 @@ Mythic.EventSpawner.EraseEventData = function(){
 Mythic.EventSpawner.SpawnEvent = function(eventName, x, y){
     Mythic.Core.CleanArray($dataMap.events);
     let newEvent = Mythic.CopyCore.CopyObjectData(Mythic.Core.MapData.events[Mythic.Core.GetIDByName(Mythic.Core.MapData.events, eventName)])
-    if (newEvent == null) debugger;
     newEvent.id = $dataMap.events.length;
     $dataMap.events.push(newEvent);
     $dataMap.events[newEvent.id].x = x;
@@ -164,7 +176,6 @@ Mythic.EventSpawner.CreateNewEvent = function(eventName){
 Mythic.EventSpawner.SpawnEventWithParentData = function(parent1, parent2, eventName, x, y){
     Mythic.Core.CleanArray($dataMap.events);
     let newEvent = Mythic.EventSpawner.CreateNewEvent(eventName); 
-    console.log(newEvent)
     Mythic.EventSpawner.setDataMap(newEvent, x, y);
     Mythic.EventSpawner.setEventParentData(newEvent, parent1, parent2)
     Mythic.Core.UpdateMapData($gameMap._mapId, $dataMap);
@@ -185,11 +196,9 @@ Mythic.EventSpawner.SpawnEventAtRandomLocation = function(){
 }
 
 Mythic.EventSpawner.SpawnEventInRegion = function(regionId, eventName){
-
-    let x = Mythic.Core.RandomNumber($gameMap.width());
-    let y = Mythic.Core.RandomNumber($gameMap.height());
-    if($gameMap.regionId(x, y) == regionId) return Mythic.EventSpawner.SpawnEvent(eventName, x, y)
-    else Mythic.EventSpawner.SpawnEventInRegion(regionId, eventName);
+    let emptyTiles = $gameMap.emptyTilesInRegion(regionId);
+    let spawnTile = Mythic.Core.RandomNumber(emptyTiles.length);
+    return Mythic.EventSpawner.SpawnEvent(eventName, emptyTiles[spawnTile][0], emptyTiles[spawnTile][1]);
 }
 
 Mythic.EventSpawner.SpawnInFrontOfPlayer = function(){

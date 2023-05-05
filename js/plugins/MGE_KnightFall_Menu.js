@@ -708,7 +708,7 @@ Window_EnemyInfo.prototype.drawAllItems = function(subject){
     if(subject.hp > 0){
         this.contents.clear();
         this.changeFontSize(15);
-        this.drawText(`Lvl: ${subject._lvl}`, 0, 0, 40, 'start')
+        this.drawText(`Lvl: ${subject._level}`, 0, 0, 40, 'start')
         this.drawText(`Hp:`, 50, 0, 40, 'start');
         this.drawGauge(80, -12, 100, subject.hpRate(), 'red', 'red');
         this.drawText(`${subject.hp}`, 80, -12, 100, 'start');

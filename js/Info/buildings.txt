@@ -1,0 +1,16 @@
+GreenHouse - Will allow the player to grow crops and Plant Monster Seeds.
+Beehive - Allows player to collect honey and Hornet Eggs.
+Trap - Allows player to collect various monster loot. Varies based on the type of tile the trap is on.
+Fire - Acts as a fast travel beacon for the player as well as a place to rest.
+MineShaft - Allows the player to collect Ores and Crystals. Can only be built in caves. 3 per map.
+Nursery - Allows the player to store monsters for egg production.
+Aviary - Allows the player to store flying monsters for breeding and leveling.
+Burrow - Allows player to store Beast monsters for breeding and leveling.
+Pit - Allows player to store Dragon Monsters for breeding and leveling.
+Terrarium - Allows the player to store Bug Monsters for breeding and leveling
+Divine Circle - Allows the player to store Holy Monsters for breeding and leveling.
+Cursed Altar - Allows the player to store Unholy monsters for breeding and leveling.
+
+
+
+
