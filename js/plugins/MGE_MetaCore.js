@@ -26,6 +26,10 @@ Mythic.MetaCore.version = 1;
 // Meta
 //=============================================================================
 
+Mythic.MetaCore.convertNumber = function (meta) {      
+    return parseInt(this.removeSpaces(meta));
+}
+
 Mythic.MetaCore.convertMetaToProperty = function(actor, propertyLocation, propertyName, propertyValue){
     if(!actor[propertyLocation]) {
         actor[propertyLocation] = {};
@@ -39,6 +43,10 @@ Mythic.MetaCore.convertMetaArrayToProperty = function(actor, propertyLocation, a
     }
     arr.map( (el, i) => { actor[propertyLocation][i] = el });
 };
+
+Mythic.MetaCore.removeSpaces = function(meta){
+    return meta.replaceAll(' ', '');
+}
 
 Mythic.MetaCore.CleanMetaData = function(meta){
     return meta.replaceAll('\n', '');

@@ -229,10 +229,8 @@ NPCShop.prototype.setup = function(type){
             this.type = 'Hunter';
             this.setupHunterInventory();
             this.createRandomInventory();
-            SceneManager.push(Scene_Shop);
-            SceneManager.prepareNextScene(this.inventory, this.inventory[0][4]); 
             break;
-        case 'Forager': 
+            case 'Forager': 
             this.setupForagerInventory();
             this.createRandomInventory();
             break; 
@@ -252,7 +250,7 @@ NPCShop.prototype.setup = function(type){
             this.setupAlchemistInventory();
             this.createRandomInventory();
             break; 
-        case 'Enchanter': 
+            case 'Enchanter': 
             this.setupEnchanterInventory();
             this.createRandomInventory();
             break;
@@ -260,14 +258,18 @@ NPCShop.prototype.setup = function(type){
             this.setupMerchantInventory();
             this.createRandomInventory();
             break; 
-    }
+        } 
+};
+
+NPCShop.prototype.OpenShop = function(){
+    SceneManager.push(Scene_Shop);
+    SceneManager.prepareNextScene(this.inventory, this.inventory[0][4]);
 };
 
 NPCShop.prototype.addItem = function(item){
     if(this.inventory.length == 0) item.push(false);
     this.inventory.push(item);
-};
-
+}
 
 NPCShop.prototype.setMinMaxItems = function(min, max){
     this.minItems = min;
@@ -343,15 +345,46 @@ NPCShop.prototype.createRandomInventory = function(){
     this.setRandomItems(this.ARMOR, $dataArmors, armorNumber);
 }
 
+/*
+* the number of the shopType meta for an item will increase the chance o
+*/
+
 NPCShop.prototype.setRandomItems = function(dataId, data, itemNumber){
-    let items = []; 
-    data.map( item => {
-        if(!item) return;
-        if(item.meta[this.type]) items.push(item);
-    })
+    let items = this.getItemList(data); 
     for(let i = 0; i < itemNumber; i++){
-        this.addItem([dataId, i + 1, 0, 0]);
+        let weightSum = this.getWeightSum(items);
+        let item = this.getRandomItem(items, weightSum);
+        this.addItem([dataId, item.id, 0, 0]);
+        items.splice(items.indexOf(item), 1);
     }
+}
+
+NPCShop.prototype.getRandomItem = function(items, weightSum){
+    var value = Mythic.Core.RandomNumber(weightSum);
+    for(var i = 0; i < items.length; i++){
+        value -= items[i].meta[this.type];
+        if (value < 0) {
+            return  items[i]
+        }
+    }
+}
+
+NPCShop.prototype.getWeightSum = function(items){
+    let sum = 0;
+    items.map(el => { sum += el.meta[this.type] });
+    return sum;
+}
+
+NPCShop.prototype.getItemList = function(data){
+    let items = [];
+    data.map( (item, i) => {
+        if(!item) return;
+        if(item.meta[this.type]){
+            item.meta[this.type] = Mythic.MetaCore.convertNumber(item.meta[this.type]);
+            items.push(item);
+        } 
+    })
+    return items;
 }
 
 
