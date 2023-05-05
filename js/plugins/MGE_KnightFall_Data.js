@@ -34,7 +34,13 @@ Game_Item.prototype.initialize = function(item) {
 };
 
 Game_Item.prototype.setMeta = function(item){
+    this.setShopData(item);
     // console.log(this);
+}
+
+Game_Item.prototype.setShopData = function(item){
+    if(!item) return;
+    if(item.meta.Hunter) item.meta.Hunter = Mythic.MetaCore.convertNumber(item.meta.Hunter);
 }
 
 
@@ -230,35 +236,43 @@ NPCShop.prototype.setup = function(type){
             this.setupHunterInventory();
             this.createRandomInventory();
             break;
-            case 'Forager': 
+        case 'Forager': 
+            this.type = 'Forager';
             this.setupForagerInventory();
             this.createRandomInventory();
             break; 
         case 'Miner': 
+            this.type = 'Miner';
             this.setupMinerInventory();
             this.createRandomInventory();
             break; 
         case 'Armorer': 
+            this.type = 'Armorer';
             this.setupArmorerInventory();
             this.createRandomInventory();
             break; 
         case 'Blacksmith': 
+            this.type = 'Blacksmith';
             this.setupBlacksmithInventory();
             this.createRandomInventory();
             break; 
-        case 'Alchemist': 
+        case 'Alchemist':
+            this.type = 'Alchemist'; 
             this.setupAlchemistInventory();
             this.createRandomInventory();
             break; 
-            case 'Enchanter': 
+            case 'Enchanter':
+                this.type = 'Enchanter'; 
             this.setupEnchanterInventory();
             this.createRandomInventory();
             break;
-        case 'Merchant': 
+        case 'Merchant':
+            this.type = 'Merchant'; 
             this.setupMerchantInventory();
             this.createRandomInventory();
             break; 
-        } 
+    } 
+    console.log(this.inventory);
 };
 
 NPCShop.prototype.OpenShop = function(){
@@ -354,8 +368,9 @@ NPCShop.prototype.setRandomItems = function(dataId, data, itemNumber){
     for(let i = 0; i < itemNumber; i++){
         let weightSum = this.getWeightSum(items);
         let item = this.getRandomItem(items, weightSum);
-        this.addItem([dataId, item.id, 0, 0]);
-        items.splice(items.indexOf(item), 1);
+        if(!item) return;
+        this.addItem([dataId, item.id ? item.id : items[0].id, 0, 0]);
+        items.splice(item.id ? items.indexOf(item) : 0, 1);
     }
 }
 
@@ -371,7 +386,7 @@ NPCShop.prototype.getRandomItem = function(items, weightSum){
 
 NPCShop.prototype.getWeightSum = function(items){
     let sum = 0;
-    items.map(el => { sum += el.meta[this.type] });
+    items.map(el => { sum += parseInt(el.meta[this.type]) });
     return sum;
 }
 
@@ -380,7 +395,6 @@ NPCShop.prototype.getItemList = function(data){
     data.map( (item, i) => {
         if(!item) return;
         if(item.meta[this.type]){
-            item.meta[this.type] = Mythic.MetaCore.convertNumber(item.meta[this.type]);
             items.push(item);
         } 
     })

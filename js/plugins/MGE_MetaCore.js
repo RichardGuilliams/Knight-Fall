@@ -26,8 +26,9 @@ Mythic.MetaCore.version = 1;
 // Meta
 //=============================================================================
 
-Mythic.MetaCore.convertNumber = function (meta) {      
-    return parseInt(this.removeSpaces(meta));
+Mythic.MetaCore.convertNumber = function (meta) {
+    if(isNaN(meta)) return parseInt(this.removeSpaces(meta));
+    else return meta;
 }
 
 Mythic.MetaCore.convertMetaToProperty = function(actor, propertyLocation, propertyName, propertyValue){
