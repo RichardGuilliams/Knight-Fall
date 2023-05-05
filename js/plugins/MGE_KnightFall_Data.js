@@ -234,44 +234,37 @@ NPCShop.prototype.setup = function(type){
         case 'Hunter':
             this.type = 'Hunter';
             this.setupHunterInventory();
-            this.createRandomInventory();
             break;
         case 'Forager': 
             this.type = 'Forager';
             this.setupForagerInventory();
-            this.createRandomInventory();
             break; 
         case 'Miner': 
             this.type = 'Miner';
             this.setupMinerInventory();
-            this.createRandomInventory();
             break; 
         case 'Armorer': 
             this.type = 'Armorer';
             this.setupArmorerInventory();
-            this.createRandomInventory();
             break; 
         case 'Blacksmith': 
             this.type = 'Blacksmith';
             this.setupBlacksmithInventory();
-            this.createRandomInventory();
             break; 
         case 'Alchemist':
             this.type = 'Alchemist'; 
             this.setupAlchemistInventory();
-            this.createRandomInventory();
             break; 
             case 'Enchanter':
                 this.type = 'Enchanter'; 
             this.setupEnchanterInventory();
-            this.createRandomInventory();
             break;
         case 'Merchant':
             this.type = 'Merchant'; 
             this.setupMerchantInventory();
-            this.createRandomInventory();
             break; 
     } 
+    this.createRandomInventory();
     console.log(this.inventory);
 };
 
