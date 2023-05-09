@@ -58,6 +58,10 @@ DataManager.extractSaveContents = function(contents) {
     Mythic.Core.MapData     = contents.mapData;
 };
 
+function MapEvent(){
+    return $gameMap._events[$gameMap._interpreter.eventId()];
+};
+
 Mythic.Core.GetInterpreterEvent = function(){
     return $gameMap._events[$gameMap._interpreter._eventId];
 }
@@ -74,7 +78,11 @@ Mythic.Core.GetIDByName = function(dataArray, name){
         if(obj.name.toLowerCase() == name.toLowerCase()) id = i;
     });
     return id;
-} 
+}
+
+Mythic.Core.GetItemByName = function(dataName, itemName){
+    return this.GetGameDataByName(dataName).find( el => { if(el) return el.name == itemName });
+}
 
 Mythic.Core.GetIDByCharacterName = function(name){
     let id = 0;
@@ -145,6 +153,9 @@ Mythic.Core.UpdateEventNames = function(){
 
 Mythic.Core.RandomNumber = function(max){
     return Math.floor(Math.random() * max);
+}
+Mythic.Core.RandomNumberWithMin = function(min, max){
+    return Math.floor(Math.random() * (max - min)) + min;
 }
 
 Mythic.Core.RandomNumberNoZero = function(max){

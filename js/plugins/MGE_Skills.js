@@ -22,32 +22,168 @@ Mythic.Skills.version = 1;
 */
 //=============================================================================
 
-// function StealableItems(){
-//     this.initialize.apply(this, arguments);
-// }
+//=============================================================================
+// Steal Manager
+//=============================================================================
 
-// StealableItems.prototype.initialize = function(){
-//     this.items = [];
-// }
+function StealManager(){
+    this.initialize.apply(this, arguments);
+}
 
-// StealableItems.prototype.addItem = function(item, quantity, chance){
-//     let item = { item, quantity, chance};
-//     this.items.push(item);
-// };
+StealManager.prototype.CODE = 101;
 
-// StealableItems.prototype.stealRate = function(subject, target){
-//     let attackingRoll = ((subject.luk * subject._level) + subject.agi);
-//     let defendingRoll = ((target.luk * target.lvl) + target.agi);
-//     return attackingRoll - defendingRoll / 2
+StealManager.prototype.initialize = function(){
+    this.items = [];
+}
 
-// };
+StealManager.prototype.addItem = function(type, name, quantity, weight){
+    if(this.items.find( item => { return item.name == name && item.type == type })) return;
+    this.items.push({type, name, quantity, weight});
+};
 
-// StealableItems.prototype.steal = function(subject, target){
-//     let item = Mythic.Core.RandomNumber(this.items.length);
-//     let roll = Mythic.Core.RandomNumber(this.stealRate(subject, target));
-//     if(roll >= this.items[item].chance) return true;
-//     return false;
-// }
+StealManager.prototype.stealRate = function(subject, target){
+
+};
+
+StealManager.prototype.steal = function(){
+
+}
+
+//=============================================================================
+// Poach Manager
+//=============================================================================
+
+
+function PoachManager(){
+    this.initialize.apply(this, arguments);
+}
+
+PoachManager.prototype.initialize = function(){
+    this.items = [];
+}
+
+PoachManager.prototype.addItem = function(){
+
+};
+
+PoachManager.prototype.poach = function(){
+
+}
+
+
+//=============================================================================
+// Summon Manager
+//=============================================================================
+
+
+function SummonManager(){
+    this.initialize.apply(this, arguments);
+}
+
+SummonManager.prototype.initialize = function(){
+    this.items = [];
+}
+
+SummonManager.prototype.summon = function(){
+
+}
+
+
+//=============================================================================
+// Enchant Manager
+//=============================================================================
+
+function EnchantManager(){
+    this.initialize.apply(this, arguments);
+}
+
+EnchantManager.prototype.initialize = function(){
+    this.items = [];
+}
+
+EnchantManager.prototype.addItem = function(){
+
+};
+
+EnchantManager.prototype.createRecipe = function(){
+
+}
+
+EnchantManager.prototype.enchant = function(){
+
+}
+
+//=============================================================================
+// Craft Manager
+//=============================================================================
+
+function CraftManager(){
+    this.initialize.apply(this, arguments);
+}
+
+CraftManager.prototype.initialize = function(){
+    this.items = [];
+}
+
+CraftManager.prototype.addItem = function(){
+
+};
+
+CraftManager.prototype.createRecipe = function(){
+
+}
+
+CraftManager.prototype.craft = function(){
+
+}
+
+//=============================================================================
+// Fusion Manager
+//=============================================================================
+
+function FusionManager(){
+    this.initialize.apply(this, arguments);
+}
+
+FusionManager.prototype.initialize = function(){
+    this.items = [];
+}
+
+FusionManager.prototype.addItem = function(){
+
+};
+
+FusionManager.prototype.createRecipe = function(){
+
+}
+
+FusionManager.prototype.fusion = function(){
+
+}
+
+//=============================================================================
+// Build Manager
+//=============================================================================
+
+function BuildManager(){
+    this.initialize.apply(this, arguments);
+}
+
+BuildManager.prototype.initialize = function(){
+    this.items = [];
+}
+
+BuildManager.prototype.addItem = function(){
+
+};
+
+BuildManager.prototype.createRecipe = function(){
+
+}
+
+BuildManager.prototype.build = function(){
+
+}
 
 //=============================================================================
 // Skills
@@ -126,9 +262,9 @@ Game_Action.prototype.applyItemEffect = function(target, effect) {
         case Game_Action.EFFECT_STEAL:
             this.itemEffectSteal(target, effect);
             break;
-            case Game_Action.EFFECT_CATCH:
-                this.itemEffectCatch($gameActors._data[this._subjectActorId], target, effect);
-        break;
+        case Game_Action.EFFECT_CATCH:
+            this.itemEffectCatch($gameActors._data[this._subjectActorId], target, effect);
+            break;
     }
 };
 
@@ -152,16 +288,6 @@ Game_Action.prototype.processSpecialSkill = function(){
     }   
 }
 
-Game_Enemy.prototype.steal = function(){
-    if ($gameParty.inBattle()) {
-        // enemy = $dataEnemies[$gameTroop._enemies[BattleManager._action._targetIndex]._enemyId]
-        if(this._stealItems.length > 0){
-            this.performSteal();
-        }
-        else BattleManager._logWindow.addText(`There is nothing to steal`); 
-    }
-    Game_Battler.prototype.performDamage.call(this);
-};
 
 Game_Enemy.prototype.catch = function(subject, target) {
     if ($gameParty.inBattle()) {
@@ -170,7 +296,7 @@ Game_Enemy.prototype.catch = function(subject, target) {
             if(this.checkCatchSuccess(subject, target)) this.catchSuccess();
             else BattleManager._logWindow.addText(`You failed to tame this monster.`);
         }
-        else BattleManager._logWindow.addText(`You cannot tame this unit`); 
+        else BattleManager._logWindow.addText(`You cannot tame this monster`); 
     }
     Game_Battler.prototype.performDamage.call(this);
 };
@@ -182,6 +308,16 @@ Game_Enemy.prototype.matchingType = function(subject){
     })
     return match;
 }
+
+Game_Enemy.prototype.steal = function(){
+    if ($gameParty.inBattle()) {
+        if(this._stealItems.length > 0){
+            this.performSteal();
+        }
+        else BattleManager._logWindow.addText(`There is nothing to steal`); 
+    }
+    Game_Battler.prototype.performDamage.call(this);
+};
 
 Game_Enemy.prototype.performSteal = function(arr){
     let subject = $gameParty.targetActor();
@@ -197,7 +333,7 @@ Game_Enemy.prototype.performSteal = function(arr){
         BattleManager._logWindow.addText(`You stole ${number} ${item.item.name}!`);
     }
     else BattleManager._logWindow.addText(`You failed to steal anything`);
-
+    
 }
 
 Game_Enemy.prototype.checkCatchSuccess = function(subject){

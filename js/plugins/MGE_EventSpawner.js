@@ -15,7 +15,42 @@ Mythic.EventSpawner.version = 1;
  * @plugindesc Creates and Modifies important parameters of the games base objects.
  * @author Richard Guilliams
  *
- * @help This plugin does not provide plugin commands.
+ * @param Spawn Map Name
+ * @type String
+ * @default Map001.json
+ * 
+ * @help This plugin can be used along with the script event command.
+ * It adds a few parameters to game events that allow the spawning of a few different types of event.
+ * first off you will need the base map that contains all the events that will be spawned.
+ * On any map you wish to spawn events, you will need to create the spawner event.
+ * The spawner will have two pages, the first page will auto run a script that 
+ * loads the map data with the spawns.
+ * the script is as follows:
+ * Mythic.Core.LoadMapData('$dataMap', 'Map001.json');
+ * 
+ * the next command will activate the self switch A.
+ * 
+ * The second page will be a parallel process that creates the spawners.
+ *  
+ * // arguments EventSpawner(spawnTime, spawnLimit, initialSpawnCount)
+ * For monster spawners use the script
+ * $gameMap._monsterSpawner = new EventSpawner(120, 2, 1);
+ * 
+ * For npc shops use the script
+ * $gameMap._shopSpawner = new EventSpawner(120, 2, 1);
+ * 
+ * for loot spawns such as random chests or hollow trunks and crates use
+ * $gameMap._lootSpawner = new EventSpawner(120, 2, 1);
+ * 
+ * for renewing resource spawns use
+ * $gameMap._resourceSpawner = new EventSpawner(120, 2, 1);
+ * 
+ * for other npc spawns use
+ * $gameMap._NPCSpawner = new EventSpawner(120, 2, 1);
+ * 
+ * in order to populate the spawners with spawns you will need to use the script
+ * // arguments addSpawn = function(name, region, limit, chance)
+ * $gameMap._lootSpawner.addSpawn('Human Bones', 3, 1, 0);
  * 
  * Version 1.00:
  * - Finished plugin!
@@ -137,9 +172,22 @@ Mythic.EventSpawner.EraseEventData = function(){
     Mythic.Core.UpdateEventNames();
 }
 
+Mythic.EventSpawner.filterMapArray = function(arr, propertyName){
+    for(let i = 1; i < arr.length; i++){
+        if(arr[i] == undefined){
+            arr.splice(i, 1);
+            i -= 1;
+        }
+        else arr[i][propertyName] = i;
+    }
+}
+
 Mythic.EventSpawner.SpawnEvent = function(eventName, x, y){
-    Mythic.Core.CleanArray($dataMap.events);
-    let newEvent = Mythic.CopyCore.CopyObjectData(Mythic.Core.MapData.events[Mythic.Core.GetIDByName(Mythic.Core.MapData.events, eventName)])
+    this.filterMapArray($dataMap.events, 'id');
+    // Mythic.Core.CleanArray($dataMap.events);
+    let newEvent = Mythic.CopyCore.CopyObjectData(
+        Mythic.Core.MapData.events[Mythic.Core.GetIDByName(Mythic.Core.MapData.events, eventName)]
+    )
     newEvent.id = $dataMap.events.length;
     $dataMap.events.push(newEvent);
     $dataMap.events[newEvent.id].x = x;
@@ -148,6 +196,7 @@ Mythic.EventSpawner.SpawnEvent = function(eventName, x, y){
     Mythic.Core.MapData.dataMap = $dataMap;
     Mythic.Core.UpdateMapData($gameMap._mapId, $dataMap);
     $gameMap._events.push(new Game_Event($gameMap._mapId, newEvent.id));
+    this.filterMapArray($gameMap._events, '_eventId');
     SceneManager._scene.children[0].createCharacters();
 }
 

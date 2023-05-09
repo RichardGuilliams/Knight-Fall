@@ -12,13 +12,13 @@ Mythic.KnightFall.version = 1;
 
 //=============================================================================
 /*: 
- * @plugindesc Allows the Meta of game items..
- * @author Richard Guilliams
+* @plugindesc Allows the Meta of game items..
+* @author Richard Guilliams
 *
- * @help This plugin does not provide plugin commands.
- * 
- * Version 1.00:
- * - Finished plugin!
+* @help This plugin does not provide plugin commands.
+* 
+* Version 1.00:
+* - Finished plugin!
 */
 //=============================================================================
 
@@ -26,6 +26,9 @@ Mythic.KnightFall.version = 1;
 //=============================================================================
 // Set Player Meta
 //=============================================================================
+function Gold(){
+    $gameParty.gainGold(999999);
+}
 
 Mythic.KnightFall.aliasItemInit = Game_Item.prototype.initialize;
 Game_Item.prototype.initialize = function(item) {
@@ -296,8 +299,8 @@ NPCShop.prototype.setMinMaxArmors = function(min, max){
 
 NPCShop.prototype.setupHunterInventory = function(){
     this.setMinMaxItems(3, 7);
-    this.setMinMaxWeapons(0, 3);
-    this.setMinMaxArmors(0, 2);    
+    this.setMinMaxWeapons(0, 1);
+    this.setMinMaxArmors(0, 1);    
 };
 
 NPCShop.prototype.setupForagerInventory = function(){
