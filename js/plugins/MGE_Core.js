@@ -62,6 +62,50 @@ function MapEvent(){
     return $gameMap._events[$gameMap._interpreter.eventId()];
 };
 
+function isShopScene(){
+    return SceneManager._scene.constructor === Scene_Shop;
+}
+
+function nonNegative(num){
+    return num > -1;
+}
+
+Mythic.Core.getWeightSum = function(items){
+    let sum = 0;
+    items.map(el => { sum += parseInt(el.meta[this.type]) });
+    return sum;
+}
+
+Mythic.Core.getRandomRamp = function(arr){
+    let weights = this.setRampingWeight(arr);
+    let value = Mythic.Core.RandomNumber(weights.reduce((a, b) => {return a + b}, 0) + 1)
+    for(i = 0; i < weights.length; i++){
+        value -= weights[i];
+        if(value <= 0){
+            if(arr[0] == null) return arr[i + 1]
+            return arr[i];
+        }
+    }
+}
+
+Mythic.Core.setRampingWeight = function(arr){
+    let weights = [];
+
+    arr.map((el, i) => {
+            if(el != null) weights.push(i + 1)
+        }
+    );
+
+    weights.map((el, i) => {
+        weights[i] *= -1
+        weights[i] += arr.length + 1
+        weights[i] *= arr.length - i;
+
+    })
+
+    return weights;
+};
+
 Mythic.Core.GetInterpreterEvent = function(){
     return $gameMap._events[$gameMap._interpreter._eventId];
 }
@@ -196,8 +240,8 @@ Mythic.Core.GetEventXWhileFlying = function(){
     
     Mythic.Core.GetEventYWhileFlying = function(){
         const direction = $gamePlayer.direction();
-    switch(direction){
-        // Down
+        switch(direction){
+            // Down
         case 2:
             return $gamePlayer.y + 1
             
@@ -205,14 +249,14 @@ Mythic.Core.GetEventXWhileFlying = function(){
             case 4:
                 return $gamePlayer.y + 1
                 
-        // Right
+                // Right
         case 6:
             return $gamePlayer.y + 1
             
             // Up
             case 8:
                 return $gamePlayer.y - 1
-    }
+            }
 }
 
 //=============================================================================
@@ -290,6 +334,21 @@ Mythic.Core.LoadMapData = function(name, src) {
 
 Mythic.Core.UpdateMapData = function(index, mapData){
     Mythic.Core.MapData.dataMaps[index] = mapData;
+}
+
+Mythic.Core.GetLeader = function(){
+
+}
+
+function getLeader(){
+    return $gameActors._data[$gameParty._actors[0]]
+}
+
+Mythic.Core.PartyLeader = {
+    _leader:    () => { return getLeader() },
+    _name:      () => { return $gameActors[getLeader()._actorId].name() },
+    _class:     () => { return $dataClasses[getLeader()._classId] },
+    _actor:     () => { return $gameActors[getLeader()._actorId] },
 }
 
 // Game Character 

@@ -217,6 +217,7 @@ function NPCShop(){
 NPCShop.prototype.initialize = function(){
     this.type = '';
     this.inventory = [];
+    this.rareItem = false;
     this.minItems = 0;
     this.maxItems = 0;
     this.minWeapons = 0;
@@ -272,8 +273,10 @@ NPCShop.prototype.setup = function(type){
 };
 
 NPCShop.prototype.OpenShop = function(){
-    SceneManager.push(Scene_Shop);
-    SceneManager.prepareNextScene(this.inventory, this.inventory[0][4]);
+    if(this.inventory.length > 0){
+        SceneManager.push(Scene_Shop);
+        SceneManager.prepareNextScene(this.inventory, this.inventory[0][5]);
+    }
 };
 
 NPCShop.prototype.addItem = function(item){
@@ -298,19 +301,19 @@ NPCShop.prototype.setMinMaxArmors = function(min, max){
 
 
 NPCShop.prototype.setupHunterInventory = function(){
-    this.setMinMaxItems(3, 7);
-    this.setMinMaxWeapons(0, 1);
-    this.setMinMaxArmors(0, 1);    
+    this.setMinMaxItems(3, 12);
+    this.setMinMaxWeapons(0, 2);
+    this.setMinMaxArmors(0, 2);    
 };
 
 NPCShop.prototype.setupForagerInventory = function(){
-    this.setMinMaxItems(3, 9);
+    this.setMinMaxItems(3, 12);
     this.setMinMaxWeapons(0, 1);
-    this.setMinMaxArmors(0, 0);
+    this.setMinMaxArmors(0, 1);
 };
 
 NPCShop.prototype.setupMinerInventory = function(){
-    this.setMinMaxItems(3, 9);
+    this.setMinMaxItems(3, 12);
     this.setMinMaxWeapons(0, 2);
     this.setMinMaxArmors(0, 2);
 };
@@ -318,29 +321,29 @@ NPCShop.prototype.setupMinerInventory = function(){
 NPCShop.prototype.setupArmorerInventory = function(){
     this.setMinMaxItems(1, 4);
     this.setMinMaxWeapons(0, 0);
-    this.setMinMaxArmors(3, 8);
+    this.setMinMaxArmors(3, 12);
 };
 
 NPCShop.prototype.setupBlacksmithInventory = function(){
     this.setMinMaxItems(1, 4);
-    this.setMinMaxWeapons(3, 9);
+    this.setMinMaxWeapons(3, 12);
     this.setMinMaxArmors(2, 5);
 };
 
 NPCShop.prototype.setupAlchemistInventory = function(){
-    this.setMinMaxItems(3, 7);
+    this.setMinMaxItems(3, 12);
     this.setMinMaxWeapons(0, 0);
     this.setMinMaxArmors(0, 0);
 };
 
 NPCShop.prototype.setupEnchanterInventory = function(){
-    this.setMinMaxItems(3, 7);
-    this.setMinMaxWeapons(0, 3);
-    this.setMinMaxArmors(0, 2);
+    this.setMinMaxItems(4, 12);
+    this.setMinMaxWeapons(0, 5);
+    this.setMinMaxArmors(0, 3);
 };
 
 NPCShop.prototype.setupMerchantInventory = function(){
-    this.setMinMaxItems(5, 10);
+    this.setMinMaxItems(5, 12);
     this.setMinMaxWeapons(5, 8);
     this.setMinMaxArmors(3, 7);
 };
@@ -362,10 +365,13 @@ NPCShop.prototype.createRandomInventory = function(){
 NPCShop.prototype.setRandomItems = function(dataId, data, itemNumber){
     let items = this.getItemList(data); 
     for(let i = 0; i < itemNumber; i++){
-        let weightSum = this.getWeightSum(items);
+        let weightSum = Mythic.Core.getWeightSum.call(this, items);
         let item = this.getRandomItem(items, weightSum);
         if(!item) return;
-        this.addItem([dataId, item.id ? item.id : items[0].id, 0, 0]);
+        let min = Mythic.MetaCore.convertNumber(item.meta.MinQuantity);
+        let max = Mythic.MetaCore.convertNumber(item.meta.MaxQuantity);
+        let quantity = Mythic.Core.RandomNumber(max - min) + min;
+        this.addItem([dataId, item.id ? item.id : items[0].id, 0, 0, quantity]);
         items.splice(item.id ? items.indexOf(item) : 0, 1);
     }
 }
@@ -375,6 +381,7 @@ NPCShop.prototype.getRandomItem = function(items, weightSum){
     for(var i = 0; i < items.length; i++){
         value -= items[i].meta[this.type];
         if (value < 0) {
+            // if(items[i].meta[this.type] <= 5) this.rareItem = true;
             return  items[i]
         }
     }
@@ -447,6 +454,110 @@ Game_Event.prototype.initialize = function(mapId, eventId) {
 
 Game_CharacterBase.prototype.ticksInSeconds = 60;
 Game_CharacterBase.prototype.ticksInMinutes = Game_CharacterBase.prototype.ticksInSeconds * 60;
+
+Game_Event.prototype.setBattlerData = function(){
+    let battler = $dataEnemies.find( el => {if(el) return el.battlerName == this.name});
+    console.log(battler);
+    this.setLevelData(battler.meta);
+}
+
+Game_Event.prototype.INCREDIBLE = 49;
+Game_Event.prototype.AMAZING = 43;
+Game_Event.prototype.GREAT = 37;
+Game_Event.prototype.GOOD = 31;
+Game_Event.prototype.DECENT = 25;
+Game_Event.prototype.BAD = 19;
+
+Game_Event.prototype.setLevelData = function(meta){
+    this._lvl = this.setLevel();
+    this.initMutationData();
+    this.setStatMods();
+
+    this.baseGrowth = {
+        hp: Mythic.MetaCore.convertNumber(meta.HpGrowth),
+        mp: Mythic.MetaCore.convertNumber(meta.MpGrowth),
+        tp: Mythic.MetaCore.convertNumber(meta.TpGrowth),
+        atk: Mythic.MetaCore.convertNumber(meta.AtkGrowth),
+        def: Mythic.MetaCore.convertNumber(meta.DefGrowth),
+        mat: Mythic.MetaCore.convertNumber(meta.MatGrowth),
+        mdf: Mythic.MetaCore.convertNumber(meta.MdfGrowth),
+        agi: Mythic.MetaCore.convertNumber(meta.AgiGrowth),
+        luk: Mythic.MetaCore.convertNumber(meta.LukGrowth),
+    }
+
+    this.params = [
+        this.addLevel(this.baseGrowth.hp),
+        this.addLevel(this.baseGrowth.mp),
+        this.addLevel(this.baseGrowth.tp),
+        this.addLevel(this.baseGrowth.atk),
+        this.addLevel(this.baseGrowth.def),
+        this.addLevel(this.baseGrowth.mat),
+        this.addLevel(this.baseGrowth.mdf),
+        this.addLevel(this.baseGrowth.agi),
+        this.addLevel(this.baseGrowth.luk),
+    ]
+};
+
+Game_Event.prototype.MAX_MUTATION_COUNT = 50;
+
+Game_Event.prototype.initMutationData = function(){
+    this._mutations = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+};
+
+Game_Event.prototype.getMutationCount = function(){
+    return this._mutations.reduce((a, b) => {return a + b}, 0)
+}
+
+Game_Event.prototype.maxMutationsReached = function(){
+    return this.getMutationCount() >= this.MAX_MUTATION_COUNT;
+}
+
+Game_Event.prototype.setMutations = function(){
+    let goal = 25;
+    if(!this.maxMutationsReached()){
+        this._mutations.map( (el, i) => {
+            let value = Mythic.Core.RandomNumber(goal + 1);
+            if(value == goal && !this.maxMutationsReached()) this._mutations[i] += 1;
+        })
+    }
+};
+
+Game_Event.prototype.maxOutMutations = function(){
+    for(let i = 0; i < 2; i++){
+        this.setMutations();
+        if(!this.maxMutationsReached()) i = 0; 
+    }
+}
+
+Game_Event.prototype.setStatMods = function(){
+    let mods = [3, 1, 5, 7];
+    this._statMods = [
+        Mythic.Core.getRandomRamp(mods),
+        Mythic.Core.getRandomRamp(mods),
+        Mythic.Core.getRandomRamp(mods),
+        Mythic.Core.getRandomRamp(mods),
+        Mythic.Core.getRandomRamp(mods),
+        Mythic.Core.getRandomRamp(mods),
+        Mythic.Core.getRandomRamp(mods),
+        Mythic.Core.getRandomRamp(mods),
+        Mythic.Core.getRandomRamp(mods),
+    ]
+    this._statScore = this._statMods.reduce((a, b) => { return a + b }, 0);
+};
+
+Game_Event.prototype.setLevel = function(){
+    let min = Mythic.MetaCore.convertNumber($dataMap.meta.MinLvl)
+    let max = Mythic.MetaCore.convertNumber($dataMap.meta.MaxLvl)
+    return Mythic.Core.RandomNumber(max - min) + min;
+};
+
+Game_Event.prototype.addLevel = function(stat){
+    let sum = 0;
+    for(let i = 0; i < this._lvl; i++){
+        sum += stat + Mythic.Core.RandomNumber(stat);
+    }
+    return sum
+};
 
 Game_Event.prototype.setEventMeta = function(eventId){
     this.name = $dataMap.events[eventId].name;
@@ -521,14 +632,7 @@ Game_Event.prototype.outOfYBreedingRange = function(event){
     return false;
 }
 
-Game_Event.prototype.characterSprite = function(){   
-    // let sprite; 
-    // SceneManager._scene.children[0]._characterSprites.forEach( (character, i) => {
-    //     if(character._character._eventId == this._eventId){
-    //         sprite = SceneManager._scene.children[0]._characterSprites[i]
-    //     } 
-            
-    // })
+Game_Event.prototype.characterSprite = function(){  
     let sprite = SceneManager._scene.children[0]._characterSprites.find( el => el._character._eventId == this._eventId);   
     return sprite;
 }

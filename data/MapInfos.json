@@ -1,11 +1,14 @@
 [
 null,
-{"id":1,"expanded":true,"name":"EventSpawnData","order":1,"parentId":0,"scrollX":798.6666666666666,"scrollY":1269.3333333333333},
-{"id":2,"expanded":false,"name":"TestingMap","order":2,"parentId":0,"scrollX":809.3333333333334,"scrollY":533.3333333333334},
-{"id":3,"expanded":false,"name":"Gallaena","order":3,"parentId":0,"scrollX":798.6666666666666,"scrollY":2837.3333333333335},
-{"id":4,"expanded":true,"name":"The Magic Forest","order":4,"parentId":0,"scrollX":1514.6666666666667,"scrollY":522.6666666666666},
-{"id":5,"expanded":false,"name":"The Warriors Guild","order":5,"parentId":4,"scrollX":809.3333333333334,"scrollY":533.3333333333334},
-{"id":6,"expanded":true,"name":"The Magic Forest","order":6,"parentId":0,"scrollX":798.6666666666666,"scrollY":522.6666666666666},
-{"id":7,"expanded":false,"name":"Battle","order":7,"parentId":0,"scrollX":809.3333333333334,"scrollY":533.3333333333334},
-{"id":8,"expanded":false,"name":"Shop","order":8,"parentId":0,"scrollX":809.3333333333334,"scrollY":533.3333333333334}
+{"id":1,"expanded":true,"name":"EventSpawnData","order":1,"parentId":0,"scrollX":921.3333333333334,"scrollY":1343.3333333333333},
+{"id":2,"expanded":false,"name":"TestingMap","order":2,"parentId":0,"scrollX":932,"scrollY":566},
+{"id":3,"expanded":false,"name":"Gallaena","order":3,"parentId":0,"scrollX":921.3333333333334,"scrollY":2804.6666666666665},
+{"id":4,"expanded":false,"name":"The Magic Forest","order":4,"parentId":0,"scrollX":1514.6666666666667,"scrollY":555.3333333333334},
+{"id":5,"expanded":false,"name":"The Warriors Guild","order":5,"parentId":4,"scrollX":932,"scrollY":566},
+{"id":6,"expanded":true,"name":"The Magic Forest","order":6,"parentId":0,"scrollX":921.3333333333334,"scrollY":555.3333333333334},
+{"id":7,"expanded":false,"name":"Battle","order":7,"parentId":0,"scrollX":932,"scrollY":566},
+{"id":8,"expanded":false,"name":"Shop","order":8,"parentId":0,"scrollX":809.3333333333334,"scrollY":533.3333333333334},
+{"id":9,"expanded":true,"name":"Gallaena","order":9,"parentId":0,"scrollX":932,"scrollY":566},
+{"id":10,"expanded":false,"name":"Gallaena Castle","order":10,"parentId":9,"scrollX":932,"scrollY":566},
+{"id":11,"expanded":false,"name":"Gallaena Meadow","order":11,"parentId":9,"scrollX":4793.142857142857,"scrollY":2910.8571428571427}
 ]
